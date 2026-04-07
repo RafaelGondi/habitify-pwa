@@ -7,15 +7,15 @@ export function useSkips() {
     const already = data.value.skips.find(s => s.habitId === habitId && s.date === date)
     if (already) return
     const skip: Skip = { id: crypto.randomUUID(), habitId, date }
-    save({ skips: [...data.value.skips, skip] })
+    save({ skips: [...(data.value.skips ?? []), skip] })
   }
 
   function unskipHabit(habitId: string, date: string) {
-    save({ skips: data.value.skips.filter(s => !(s.habitId === habitId && s.date === date)) })
+    save({ skips: (data.value.skips ?? []).filter(s => !(s.habitId === habitId && s.date === date)) })
   }
 
   function isSkipped(habitId: string, date: string): boolean {
-    return data.value.skips.some(s => s.habitId === habitId && s.date === date)
+    return (data.value.skips ?? []).some(s => s.habitId === habitId && s.date === date)
   }
 
   return { skipHabit, unskipHabit, isSkipped }

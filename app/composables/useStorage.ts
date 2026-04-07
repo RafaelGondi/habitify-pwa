@@ -11,7 +11,11 @@ export function useStorage() {
     if (import.meta.client) {
       try {
         const raw = localStorage.getItem(STORAGE_KEY)
-        if (raw) return JSON.parse(raw) as AppData
+        if (raw) {
+          const parsed = JSON.parse(raw) as AppData
+          if (!parsed.skips) parsed.skips = []
+          return parsed
+        }
       }
       catch {}
     }
