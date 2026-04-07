@@ -18,7 +18,7 @@ function openEdit(habit: Habit) {
   isModalOpen.value = true
 }
 
-function handleSubmit(data: Omit<Habit, 'id' | 'createdAt' | 'order'>) {
+function handleSubmit(data: Omit<Habit, 'id' | 'order'>) {
   if (editingHabit.value) {
     updateHabit(editingHabit.value.id, data)
     toast.add({ title: 'Hábito atualizado!', icon: 'i-lucide-check', color: 'success' })

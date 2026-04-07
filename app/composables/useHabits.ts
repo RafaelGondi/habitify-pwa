@@ -9,11 +9,11 @@ export function useHabits() {
       .sort((a, b) => a.order - b.order),
   )
 
-  function addHabit(input: Omit<Habit, 'id' | 'createdAt' | 'order'>): Habit {
+  function addHabit(input: Omit<Habit, 'id' | 'order'> & { createdAt?: string }): Habit {
     const habit: Habit = {
       ...input,
       id: crypto.randomUUID(),
-      createdAt: new Date().toISOString(),
+      createdAt: input.createdAt ?? new Date().toISOString(),
       order: data.value.habits.length,
     }
     save({ habits: [...data.value.habits, habit] })

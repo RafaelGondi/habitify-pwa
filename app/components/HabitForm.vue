@@ -6,7 +6,7 @@ const props = defineProps<{
 }>()
 
 const emit = defineEmits<{
-  submit: [data: Omit<Habit, 'id' | 'createdAt' | 'order'>]
+  submit: [data: Omit<Habit, 'id' | 'order'>]
   cancel: []
 }>()
 
@@ -45,6 +45,11 @@ const emoji = ref(props.habit?.emoji ?? '🎯')
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
 const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
+const startDate = ref<string>(
+  props.habit?.createdAt
+    ? props.habit.createdAt.slice(0, 10)
+    : toDateString(new Date()),
+)
 const error = ref('')
 
 function toggleDay(day: WeekDay) {
@@ -77,6 +82,7 @@ function handleSubmit() {
     name: name.value.trim(),
     emoji: emoji.value,
     recurrence,
+    createdAt: new Date(startDate.value + 'T12:00:00').toISOString(),
   })
 }
 </script>
@@ -193,6 +199,20 @@ function handleSubmit() {
         </div>
       </div>
     </Transition>
+
+    <!-- Start date -->
+    <div>
+      <label class="block text-sm font-medium mb-1.5 text-default">Início do hábito</label>
+      <input
+        v-model="startDate"
+        type="date"
+        :max="toDateString(new Date())"
+        class="w-full h-10 px-3 rounded-xl border border-default bg-background text-default text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
+      >
+      <p class="text-xs text-muted mt-1">
+        Defina uma data passada para registrar hábitos retroativamente
+      </p>
+    </div>
 
     <!-- Error -->
     <p v-if="error" class="text-sm text-red-500 -mt-2">
