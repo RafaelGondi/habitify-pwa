@@ -42,8 +42,7 @@ const { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isF
 // Card mode for HabitCard
 const cardMode = computed(() => {
   if (isFuture.value) return 'future'
-  if (isPast.value) return 'past'
-  return 'editable'
+  return 'editable' // past and today are both interactive
 })
 
 // Habit creation
