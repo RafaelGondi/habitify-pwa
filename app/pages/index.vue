@@ -108,8 +108,6 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           @click="navigate('next')"
         />
 
-        <!-- Spacer to keep layout balanced -->
-        <div class="w-8" />
       </div>
 
       <!-- Back to today strip -->
