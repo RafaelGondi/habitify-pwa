@@ -3,7 +3,7 @@ const { days, hasMore, loadMore } = useHistoryDays()
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full">
+  <div class="flex flex-col h-full overflow-y-auto">
     <!-- Header -->
     <header class="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
       <div class="flex items-center h-14">

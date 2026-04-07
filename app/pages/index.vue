@@ -1,91 +1,213 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
 
-const { dueToday, completionRate, completedCount, allDone, toggleHabit } = useTodayHabits()
+const todayStr = toDateString(new Date())
+
+// Current date being viewed
+const currentDateStr = ref(todayStr)
+const slideDir = ref<'left' | 'right'>('left')
+
+// Navigation
+function navigate(dir: 'prev' | 'next') {
+  slideDir.value = dir === 'next' ? 'left' : 'right'
+  const d = new Date(currentDateStr.value + 'T12:00:00')
+  d.setDate(d.getDate() + (dir === 'next' ? 1 : -1))
+  currentDateStr.value = toDateString(d)
+}
+
+function goToToday() {
+  slideDir.value = currentDateStr.value > todayStr ? 'right' : 'left'
+  currentDateStr.value = todayStr
+}
+
+// Touch / swipe
+let touchStartX = 0
+let touchStartY = 0
+function onTouchStart(e: TouchEvent) {
+  touchStartX = e.touches[0].clientX
+  touchStartY = e.touches[0].clientY
+}
+function onTouchEnd(e: TouchEvent) {
+  const dx = touchStartX - e.changedTouches[0].clientX
+  const dy = Math.abs(touchStartY - e.changedTouches[0].clientY)
+  // Only trigger on horizontal swipes (dx > 50, more horizontal than vertical)
+  if (Math.abs(dx) > 50 && Math.abs(dx) > dy) {
+    navigate(dx > 0 ? 'next' : 'prev')
+  }
+}
+
+// Day data
+const { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit } = useDayHabits(currentDateStr)
+
+// Card mode for HabitCard
+const cardMode = computed(() => {
+  if (isFuture.value) return 'future'
+  if (isPast.value) return 'past'
+  return 'editable'
+})
+
+// Habit creation
 const { addHabit } = useHabits()
 const toast = useToast()
-
 const isModalOpen = ref(false)
-const todayFormatted = formatTodayFull()
 
 function handleHabitSubmit(data: Omit<Habit, 'id' | 'createdAt' | 'order'>) {
   addHabit(data)
   isModalOpen.value = false
   toast.add({ title: 'Hábito criado!', icon: 'i-lucide-check-circle', color: 'success' })
 }
+
+// Date header labels
+const dateLabel = computed(() => {
+  if (currentDateStr.value === todayStr) return 'Hoje'
+  const yesterday = (() => { const d = new Date(); d.setDate(d.getDate() - 1); return toDateString(d) })()
+  const tomorrow = (() => { const d = new Date(); d.setDate(d.getDate() + 1); return toDateString(d) })()
+  if (currentDateStr.value === yesterday) return 'Ontem'
+  if (currentDateStr.value === tomorrow) return 'Amanhã'
+  return formatDateLabel(currentDateStr.value)
+})
+
+const dateSub = computed(() => {
+  const d = new Date(currentDateStr.value + 'T12:00:00')
+  const s = d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' })
+  return s.charAt(0).toUpperCase() + s.slice(1)
+})
+
+const isNotToday = computed(() => currentDateStr.value !== todayStr)
 </script>
 
 <template>
-  <div class="flex flex-col min-h-full">
+  <div class="flex flex-col h-full">
     <!-- Header -->
-    <header class="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
-      <div class="flex items-center justify-between h-14">
-        <div>
-          <h1 class="font-bold text-lg leading-tight">Hoje</h1>
-          <p class="text-xs text-muted capitalize leading-tight">{{ todayFormatted }}</p>
-        </div>
+    <header
+      class="shrink-0 bg-background/90 backdrop-blur-sm border-b border-default"
+      style="padding-top: env(safe-area-inset-top, 0px)"
+    >
+      <div class="flex items-center gap-2 px-2 h-14">
+        <!-- Prev -->
         <UButton
+          icon="i-lucide-chevron-left"
+          variant="ghost"
+          color="neutral"
+          size="sm"
+          @click="navigate('prev')"
+        />
+
+        <!-- Date label -->
+        <div class="flex-1 text-center">
+          <div class="flex items-center justify-center gap-2">
+            <h1 class="font-bold text-lg leading-tight">{{ dateLabel }}</h1>
+            <Transition name="fade">
+              <button
+                v-if="isNotToday"
+                class="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary"
+                @click="goToToday"
+              >
+                Hoje
+              </button>
+            </Transition>
+          </div>
+          <p class="text-xs text-muted capitalize leading-tight">{{ dateSub }}</p>
+        </div>
+
+        <!-- Next -->
+        <UButton
+          icon="i-lucide-chevron-right"
+          variant="ghost"
+          color="neutral"
+          size="sm"
+          @click="navigate('next')"
+        />
+
+        <!-- Add habit (today only) -->
+        <UButton
+          v-if="isToday"
           icon="i-lucide-plus"
           variant="ghost"
           color="neutral"
           size="sm"
           @click="isModalOpen = true"
         />
+        <!-- Spacer to keep layout balanced when button is hidden -->
+        <div v-else class="w-8" />
+      </div>
+
+      <!-- Progress bar (past + today only) -->
+      <div v-if="!isFuture && dueHabits.length" class="px-4 pb-3">
+        <div class="flex items-center justify-between mb-1.5">
+          <span class="text-xs text-muted">
+            {{ completedCount }}/{{ dueHabits.length }}
+          </span>
+          <span class="text-xs font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
+        </div>
+        <UProgress :value="completionRate * 100" color="primary" size="xs" />
       </div>
     </header>
 
-    <!-- Progress bar -->
-    <div v-if="dueToday.length" class="px-4 pt-4 pb-2">
-      <div class="flex items-center justify-between mb-2">
-        <span class="text-sm text-muted">
-          {{ completedCount }} de {{ dueToday.length }}
-          {{ dueToday.length === 1 ? 'hábito' : 'hábitos' }} concluído{{ completedCount !== 1 ? 's' : '' }}
-        </span>
-        <span class="text-sm font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
-      </div>
-      <UProgress :value="completionRate * 100" color="primary" size="sm" />
-    </div>
-
-    <!-- All done banner -->
-    <Transition
-      enter-active-class="transition-all duration-300"
-      enter-from-class="opacity-0 scale-95"
-      enter-to-class="opacity-100 scale-100"
+    <!-- Swipeable content area -->
+    <div
+      class="flex-1 relative overflow-hidden"
+      @touchstart.passive="onTouchStart"
+      @touchend.passive="onTouchEnd"
     >
-      <div v-if="allDone" class="mx-4 mt-2 mb-1 px-4 py-3 rounded-2xl bg-primary/10 text-center">
-        <p class="text-sm font-semibold text-primary">
-          🎉 Todos os hábitos de hoje concluídos!
-        </p>
-      </div>
-    </Transition>
+      <Transition :name="'slide-' + slideDir">
+        <div :key="currentDateStr" class="absolute inset-0 overflow-y-auto">
+          <!-- All done banner (today only) -->
+          <Transition name="fade">
+            <div v-if="allDone && isToday" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-primary/10 text-center">
+              <p class="text-sm font-semibold text-primary">
+                🎉 Todos os hábitos de hoje concluídos!
+              </p>
+            </div>
+          </Transition>
 
-    <!-- Habit list -->
-    <div v-if="dueToday.length" class="flex-1 px-3 pt-2 pb-4">
-      <TransitionGroup
-        name="list"
-        tag="div"
-        class="flex flex-col gap-1"
-      >
-        <div
-          v-for="item in dueToday"
-          :key="item.habit.id"
-          class="rounded-2xl bg-elevated/40"
-        >
-          <HabitCard :item="item" @toggle="toggleHabit(item.habit.id)" />
+          <!-- Future banner -->
+          <div v-if="isFuture && dueHabits.length" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-elevated/60 text-center">
+            <p class="text-sm text-muted">
+              📅 {{ dueHabits.length }} {{ dueHabits.length === 1 ? 'hábito planejado' : 'hábitos planejados' }} para este dia
+            </p>
+          </div>
+
+          <!-- Habit list -->
+          <div v-if="dueHabits.length" class="px-3 pt-2 pb-4 flex flex-col gap-1">
+            <div
+              v-for="item in dueHabits"
+              :key="item.habit.id"
+              class="rounded-2xl bg-elevated/40"
+            >
+              <HabitCard
+                :item="item"
+                :mode="cardMode"
+                @toggle="toggleHabit(item.habit.id)"
+              />
+            </div>
+          </div>
+
+          <!-- Empty state -->
+          <div v-else class="flex flex-col items-center justify-center px-8 py-16 text-center">
+            <template v-if="isToday">
+              <div class="text-5xl mb-4">📋</div>
+              <h2 class="font-bold text-lg mb-1">Nenhum hábito para hoje</h2>
+              <p class="text-sm text-muted mb-6 leading-relaxed">
+                Crie seu primeiro hábito e comece a construir uma rotina incrível
+              </p>
+              <UButton icon="i-lucide-plus" @click="isModalOpen = true">
+                Adicionar hábito
+              </UButton>
+            </template>
+            <template v-else-if="isPast">
+              <div class="text-4xl mb-3">🗓️</div>
+              <p class="font-medium mb-1">Sem hábitos neste dia</p>
+              <p class="text-sm text-muted">Nenhum hábito estava ativo nesta data</p>
+            </template>
+            <template v-else>
+              <div class="text-4xl mb-3">✨</div>
+              <p class="font-medium mb-1">Nenhum hábito planejado</p>
+              <p class="text-sm text-muted">Adicione hábitos na aba "Hoje" para vê-los aqui</p>
+            </template>
+          </div>
         </div>
-      </TransitionGroup>
-    </div>
-
-    <!-- Empty state -->
-    <div v-else class="flex-1 flex flex-col items-center justify-center px-8 py-12 text-center">
-      <div class="text-5xl mb-4">📋</div>
-      <h2 class="font-bold text-lg mb-1">Nenhum hábito para hoje</h2>
-      <p class="text-sm text-muted mb-6 leading-relaxed">
-        Crie seu primeiro hábito e comece a construir uma rotina incrível
-      </p>
-      <UButton icon="i-lucide-plus" @click="isModalOpen = true">
-        Adicionar hábito
-      </UButton>
+      </Transition>
     </div>
 
     <!-- Modal -->
@@ -101,17 +223,23 @@ function handleHabitSubmit(data: Omit<Habit, 'id' | 'createdAt' | 'order'>) {
 </template>
 
 <style scoped>
-.list-move,
-.list-enter-active,
-.list-leave-active {
-  transition: all 0.3s ease;
+/* Slide to next day (swipe left) */
+.slide-left-enter-active,
+.slide-left-leave-active {
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.list-enter-from {
-  opacity: 0;
-  transform: translateX(-20px);
+.slide-left-enter-from { transform: translateX(100%); }
+.slide-left-leave-to   { transform: translateX(-100%); }
+
+/* Slide to prev day (swipe right) */
+.slide-right-enter-active,
+.slide-right-leave-active {
+  transition: transform 0.28s cubic-bezier(0.4, 0, 0.2, 1);
 }
-.list-leave-to {
-  opacity: 0;
-  transform: translateX(20px);
-}
+.slide-right-enter-from { transform: translateX(-100%); }
+.slide-right-leave-to   { transform: translateX(100%); }
+
+/* Fade for banners */
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s ease; }
+.fade-enter-from, .fade-leave-to { opacity: 0; }
 </style>
