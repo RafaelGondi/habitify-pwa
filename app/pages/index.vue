@@ -108,17 +108,8 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           @click="navigate('next')"
         />
 
-        <!-- Add habit (today only) -->
-        <UButton
-          v-if="isToday"
-          icon="i-lucide-plus"
-          variant="ghost"
-          color="neutral"
-          size="sm"
-          @click="isModalOpen = true"
-        />
-        <!-- Spacer to keep layout balanced when button is hidden -->
-        <div v-else class="w-8" />
+        <!-- Spacer to keep layout balanced -->
+        <div class="w-8" />
       </div>
 
       <!-- Back to today strip -->
@@ -210,6 +201,16 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         </div>
       </Transition>
     </div>
+
+    <!-- FAB -->
+    <button
+      v-if="isToday"
+      class="fixed z-20 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      style="bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem); right: 1rem"
+      @click="isModalOpen = true"
+    >
+      <UIcon name="i-lucide-plus" class="text-2xl" />
+    </button>
 
     <!-- Modal -->
     <UModal v-model:open="isModalOpen" title="Novo hábito">
