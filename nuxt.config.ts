@@ -36,6 +36,8 @@ export default defineNuxtConfig({
       display: 'standalone',
       orientation: 'portrait',
       start_url: '/',
+      id: '/',
+      scope: '/',
       icons: [
         {
           src: '/icons/icon-192x192.png',

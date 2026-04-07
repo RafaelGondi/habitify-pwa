@@ -51,6 +51,8 @@ async function handleImport(e: Event) {
 
 const modalTitle = computed(() => editingHabit.value ? 'Editar hábito' : 'Novo hábito')
 const modalKey = computed(() => editingHabit.value?.id ?? 'new')
+
+const { $pwa } = useNuxtApp()
 </script>
 
 <template>
@@ -130,6 +132,21 @@ const modalKey = computed(() => editingHabit.value?.id ?? 'new')
           </div>
           <UColorModeSelect size="sm" variant="outline" />
         </div>
+      </section>
+
+      <!-- Install section -->
+      <section v-if="$pwa?.showInstallPrompt" class="border-t border-default pt-6">
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Aplicativo</h2>
+        <button
+          class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors text-left"
+          @click="$pwa?.install()"
+        >
+          <UIcon name="i-lucide-download" class="text-primary text-lg shrink-0" />
+          <div>
+            <p class="font-medium text-sm text-primary">Instalar aplicativo</p>
+            <p class="text-xs text-muted">Adicionar à tela inicial como app</p>
+          </div>
+        </button>
       </section>
 
       <!-- Data section -->
