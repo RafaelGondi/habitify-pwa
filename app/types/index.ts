@@ -1,10 +1,11 @@
 export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
 
-export type RecurrenceType = 'daily' | 'weekdays' | 'weekends' | 'custom'
+export type RecurrenceType = 'daily' | 'weekdays' | 'weekends' | 'custom' | 'weekly_x'
 
 export interface HabitRecurrence {
   type: RecurrenceType
   days?: WeekDay[]
+  timesPerWeek?: number
 }
 
 export interface Habit {
@@ -35,6 +36,7 @@ export interface HabitWithStatus {
   habit: Habit
   completed: boolean
   completionId?: string
+  weeklyProgress?: { done: number, total: number }
 }
 
 export interface DayRecord {

@@ -16,17 +16,20 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
 
   const dueHabits = computed((): HabitWithStatus[] => {
     const completions = data.value.completions.filter(c => c.date === dateStr.value)
+    const weekStart = getWeekStart(dateStr.value)
+    const weekEnd = getWeekEnd(dateStr.value)
+    const weekCompletions = data.value.completions.filter(
+      c => c.date >= weekStart && c.date <= weekEnd,
+    )
     const d = dateObj.value
     const target = new Date(dateStr.value + 'T00:00:00')
 
     return data.value.habits
       .filter((h) => {
         if (isFuture.value) {
-          // Future: show only currently active habits due on that day
           if (h.archivedAt) return false
         }
         else {
-          // Past / today: habit must have existed on that date
           const created = new Date(h.createdAt)
           created.setHours(0, 0, 0, 0)
           if (created > target) return false
@@ -39,11 +42,24 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
         return isHabitDueOn(h, d)
       })
       .sort((a, b) => a.order - b.order)
-      .map(h => ({
-        habit: h,
-        completed: completions.some(c => c.habitId === h.id),
-        completionId: completions.find(c => c.habitId === h.id)?.id,
-      }))
+      .map((h) => {
+        const completedToday = completions.some(c => c.habitId === h.id)
+        if (h.recurrence.type === 'weekly_x') {
+          const total = h.recurrence.timesPerWeek ?? 1
+          const done = weekCompletions.filter(c => c.habitId === h.id).length
+          return {
+            habit: h,
+            completed: completedToday || done >= total,
+            completionId: completions.find(c => c.habitId === h.id)?.id,
+            weeklyProgress: { done, total },
+          }
+        }
+        return {
+          habit: h,
+          completed: completedToday,
+          completionId: completions.find(c => c.habitId === h.id)?.id,
+        }
+      })
   })
 
   const completedCount = computed(() => dueHabits.value.filter(h => h.completed).length)
@@ -59,6 +75,14 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
 
   function toggleHabit(habitId: string) {
     if (!isEditable.value) return
+    const item = dueHabits.value.find(h => h.habit.id === habitId)
+    if (!item) return
+    // For weekly_x: block toggle if quota met and not completed today
+    if (item.habit.recurrence.type === 'weekly_x' && item.weeklyProgress) {
+      const { done, total } = item.weeklyProgress
+      const completedToday = !!item.completionId
+      if (!completedToday && done >= total) return
+    }
     toggle(habitId, dateStr.value)
   }
 

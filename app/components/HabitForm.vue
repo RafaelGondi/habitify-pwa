@@ -26,6 +26,7 @@ const RECURRENCE_OPTIONS: Array<{ value: RecurrenceType, label: string }> = [
   { value: 'daily', label: 'Todo dia' },
   { value: 'weekdays', label: 'Dias úteis' },
   { value: 'weekends', label: 'Fim de semana' },
+  { value: 'weekly_x', label: 'X vezes/semana' },
   { value: 'custom', label: 'Personalizado' },
 ]
 
@@ -43,6 +44,7 @@ const name = ref(props.habit?.name ?? '')
 const emoji = ref(props.habit?.emoji ?? '🎯')
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
+const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
 const error = ref('')
 
 function toggleDay(day: WeekDay) {
@@ -68,6 +70,7 @@ function handleSubmit() {
   const recurrence: HabitRecurrence = {
     type: recurrenceType.value,
     ...(recurrenceType.value === 'custom' ? { days: customDays.value } : {}),
+    ...(recurrenceType.value === 'weekly_x' ? { timesPerWeek: timesPerWeek.value } : {}),
   }
 
   emit('submit', {
@@ -126,6 +129,42 @@ function handleSubmit() {
         </button>
       </div>
     </div>
+
+    <!-- Times per week picker -->
+    <Transition
+      enter-active-class="transition-all duration-200"
+      enter-from-class="opacity-0 -translate-y-2"
+      enter-to-class="opacity-100 translate-y-0"
+      leave-active-class="transition-all duration-150"
+      leave-from-class="opacity-100 translate-y-0"
+      leave-to-class="opacity-0 -translate-y-2"
+    >
+      <div v-if="recurrenceType === 'weekly_x'">
+        <label class="block text-sm font-medium mb-1.5 text-default">Quantas vezes por semana?</label>
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            class="w-10 h-10 rounded-xl bg-elevated text-lg font-bold flex items-center justify-center hover:bg-accented transition-colors disabled:opacity-30"
+            :disabled="timesPerWeek <= 1"
+            @click="timesPerWeek = Math.max(1, timesPerWeek - 1)"
+          >
+            −
+          </button>
+          <div class="flex-1 text-center">
+            <span class="text-3xl font-bold text-primary">{{ timesPerWeek }}</span>
+            <span class="text-sm text-muted ml-1">{{ timesPerWeek === 1 ? 'vez' : 'vezes' }}</span>
+          </div>
+          <button
+            type="button"
+            class="w-10 h-10 rounded-xl bg-elevated text-lg font-bold flex items-center justify-center hover:bg-accented transition-colors disabled:opacity-30"
+            :disabled="timesPerWeek >= 7"
+            @click="timesPerWeek = Math.min(7, timesPerWeek + 1)"
+          >
+            +
+          </button>
+        </div>
+      </div>
+    </Transition>
 
     <!-- Custom days -->
     <Transition

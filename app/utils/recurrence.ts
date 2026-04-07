@@ -7,7 +7,23 @@ export function isHabitDueOn(habit: Habit, date: Date): boolean {
     case 'weekdays': return day >= 1 && day <= 5
     case 'weekends': return day === 0 || day === 6
     case 'custom': return (habit.recurrence.days ?? []).includes(day)
+    case 'weekly_x': return true
   }
+}
+
+export function getWeekStart(dateStr: string): string {
+  const date = new Date(dateStr + 'T12:00:00')
+  const day = date.getDay() // 0=Sun
+  const diff = day === 0 ? -6 : 1 - day
+  const monday = new Date(date.getTime() + diff * 86400000)
+  return toDateString(monday)
+}
+
+export function getWeekEnd(dateStr: string): string {
+  const start = getWeekStart(dateStr)
+  const monday = new Date(start + 'T12:00:00')
+  const sunday = new Date(monday.getTime() + 6 * 86400000)
+  return toDateString(sunday)
 }
 
 export function toDateString(date: Date): string {
@@ -49,6 +65,7 @@ export function recurrenceLabel(type: RecurrenceType): string {
     weekdays: 'Dias úteis',
     weekends: 'Fim de semana',
     custom: 'Personalizado',
+    weekly_x: 'X vezes/semana',
   }
   return labels[type]
 }

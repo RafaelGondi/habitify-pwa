@@ -79,7 +79,11 @@ const { $pwa } = useNuxtApp()
             </div>
             <div class="flex-1 min-w-0">
               <p class="font-medium text-sm truncate">{{ habit.name }}</p>
-              <p class="text-xs text-muted">{{ recurrenceLabel(habit.recurrence.type) }}</p>
+              <p class="text-xs text-muted">
+                {{ habit.recurrence.type === 'weekly_x'
+                  ? `${habit.recurrence.timesPerWeek}x por semana`
+                  : recurrenceLabel(habit.recurrence.type) }}
+              </p>
             </div>
             <!-- Actions -->
             <div class="flex gap-1 shrink-0">

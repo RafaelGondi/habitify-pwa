@@ -41,10 +41,30 @@ const streak = computed(() => getStreak(props.item.habit))
       >
         {{ item.habit.name }}
       </p>
-      <p v-if="streak >= 1 && mode !== 'future'" class="text-xs text-muted flex items-center gap-0.5 mt-0.5">
-        <span>🔥</span>
-        <span>{{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
-      </p>
+      <div v-if="streak >= 1 && mode !== 'future'" class="flex items-center gap-2 mt-0.5">
+        <span class="text-xs text-muted flex items-center gap-0.5">
+          <span>🔥</span>
+          <span>{{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
+        </span>
+        <span
+          v-if="item.weeklyProgress"
+          class="text-xs font-medium px-1.5 py-0.5 rounded-full"
+          :class="item.weeklyProgress.done >= item.weeklyProgress.total
+            ? 'bg-primary/15 text-primary'
+            : 'bg-elevated text-muted'"
+        >
+          {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} sem.
+        </span>
+      </div>
+      <span
+        v-else-if="item.weeklyProgress && mode !== 'future'"
+        class="text-xs font-medium px-1.5 py-0.5 rounded-full mt-0.5 inline-block"
+        :class="item.weeklyProgress.done >= item.weeklyProgress.total
+          ? 'bg-primary/15 text-primary'
+          : 'bg-elevated text-muted'"
+      >
+        {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} sem.
+      </span>
     </div>
 
     <!-- Editable: interactive check circle -->
