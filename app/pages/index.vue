@@ -141,7 +141,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           </span>
           <span class="text-xs font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
         </div>
-        <UProgress :value="completionRate * 100" color="primary" size="md" class="progress-no-anim" />
+        <UProgress :model-value="completionRate * 100" color="primary" size="md" class="progress-no-anim" />
       </div>
     </header>
 
