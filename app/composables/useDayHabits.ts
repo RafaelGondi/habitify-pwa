@@ -107,5 +107,5 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
     }
   }
 
-  return { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip }
+  return { dueHabits, activeHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip }
 }

@@ -37,7 +37,7 @@ function onTouchEnd(e: TouchEvent) {
 }
 
 // Day data
-const { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
+const { dueHabits, activeHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
 
 // Card mode for HabitCard
 const cardMode = computed(() => {
@@ -130,10 +130,10 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       </Transition>
 
       <!-- Progress bar (past + today only) -->
-      <div v-if="!isFuture && dueHabits.length" class="px-4 pb-3">
+      <div v-if="!isFuture && activeHabits.length" class="px-4 pb-3">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-xs text-muted">
-            {{ completedCount }}/{{ dueHabits.length }}
+            {{ completedCount }}/{{ activeHabits.length }}
           </span>
           <span class="text-xs font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
         </div>
