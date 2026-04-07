@@ -43,8 +43,8 @@ function onHandleTouchEnd(e: TouchEvent) {
       <div
         v-if="open"
         class="fixed bottom-0 z-50 w-full rounded-t-3xl flex flex-col shadow-2xl"
-        style="background-color: var(--ui-bg);"
         style="
+          background-color: var(--ui-bg);
           max-width: 480px;
           left: 50%;
           transform: translateX(-50%);
