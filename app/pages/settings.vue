@@ -1,8 +1,9 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
 
-const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit } = useHabits()
+const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
 const showArchived = ref(false)
+const confirmDeleteId = ref<string | null>(null)
 const { exportJSON, importJSON } = useExport()
 const toast = useToast()
 
@@ -102,6 +103,13 @@ const { $pwa } = useNuxtApp()
                 size="xs"
                 @click="handleArchive(habit)"
               />
+              <UButton
+                icon="i-lucide-trash-2"
+                variant="ghost"
+                color="error"
+                size="xs"
+                @click="confirmDeleteId = habit.id"
+              />
             </div>
           </div>
         </div>
@@ -158,6 +166,13 @@ const { $pwa } = useNuxtApp()
                 color="neutral"
                 size="xs"
                 @click="unarchiveHabit(habit.id)"
+              />
+              <UButton
+                icon="i-lucide-trash-2"
+                variant="ghost"
+                color="error"
+                size="xs"
+                @click="confirmDeleteId = habit.id"
               />
             </div>
           </div>
@@ -229,6 +244,32 @@ const { $pwa } = useNuxtApp()
     >
       <UIcon name="i-lucide-plus" class="text-2xl" />
     </button>
+
+    <!-- Confirm delete sheet -->
+    <AppBottomSheet
+      :open="!!confirmDeleteId"
+      title="Excluir hábito"
+      @update:open="if (!$event) confirmDeleteId = null"
+    >
+      <div class="px-5 pt-1 pb-8 flex flex-col gap-4">
+        <p class="text-sm text-muted">
+          Tem certeza? Isso vai excluir o hábito e <strong class="text-default">todo o histórico</strong> permanentemente. Essa ação não pode ser desfeita.
+        </p>
+        <div class="flex gap-3">
+          <UButton variant="outline" color="neutral" class="flex-1" @click="confirmDeleteId = null">
+            Cancelar
+          </UButton>
+          <UButton
+            color="error"
+            class="flex-1"
+            icon="i-lucide-trash-2"
+            @click="() => { deleteHabit(confirmDeleteId!); confirmDeleteId = null; toast.add({ title: 'Hábito excluído', icon: 'i-lucide-trash-2', color: 'neutral' }) }"
+          >
+            Excluir
+          </UButton>
+        </div>
+      </div>
+    </AppBottomSheet>
 
     <!-- Bottom sheet -->
     <AppBottomSheet v-model:open="isModalOpen" :title="modalTitle">

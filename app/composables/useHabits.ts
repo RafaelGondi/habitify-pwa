@@ -40,5 +40,13 @@ export function useHabits() {
     updateHabit(id, { archivedAt: undefined })
   }
 
-  return { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit }
+  function deleteHabit(id: string) {
+    save({
+      habits: data.value.habits.filter(h => h.id !== id),
+      completions: data.value.completions.filter(c => c.habitId !== id),
+      skips: (data.value.skips ?? []).filter(s => s.habitId !== id),
+    })
+  }
+
+  return { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit }
 }
