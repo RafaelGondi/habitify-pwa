@@ -117,6 +117,21 @@ const modalKey = computed(() => editingHabit.value?.id ?? 'new')
         </div>
       </section>
 
+      <!-- Appearance section -->
+      <section class="border-t border-default pt-6">
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Aparência</h2>
+        <div class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default">
+          <div class="flex items-center gap-3">
+            <UIcon name="i-lucide-sun-moon" class="text-primary text-lg shrink-0" />
+            <div>
+              <p class="font-medium text-sm">Tema</p>
+              <p class="text-xs text-muted">Claro, escuro ou automático</p>
+            </div>
+          </div>
+          <UColorModeSelect size="sm" variant="outline" />
+        </div>
+      </section>
+
       <!-- Data section -->
       <section class="border-t border-default pt-6">
         <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Dados</h2>
