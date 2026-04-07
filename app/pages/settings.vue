@@ -11,6 +11,10 @@ function handleDelete() {
   confirmDeleteId.value = null
   toast.add({ title: 'Hábito excluído', icon: 'i-lucide-trash-2', color: 'neutral' })
 }
+
+function closeConfirmDelete(val: boolean) {
+  if (!val) confirmDeleteId.value = null
+}
 const { exportJSON, importJSON } = useExport()
 const toast = useToast()
 
@@ -256,7 +260,7 @@ const { $pwa } = useNuxtApp()
     <AppBottomSheet
       :open="!!confirmDeleteId"
       title="Excluir hábito"
-      @update:open="if (!$event) confirmDeleteId = null"
+      @update:open="closeConfirmDelete"
     >
       <div class="px-5 pt-1 pb-8 flex flex-col gap-4">
         <p class="text-sm text-muted">
