@@ -9,6 +9,7 @@ const props = defineProps<{
 
 defineEmits<{
   toggle: []
+  detail: []
 }>()
 
 const isEditable = computed(() => !props.mode || props.mode === 'editable')
@@ -22,7 +23,8 @@ const streak = computed(() => getStreak(props.item.habit))
     class="flex items-center gap-3 px-4 py-3 rounded-xl"
     :class="item.completed && mode !== 'future' ? 'opacity-55' : ''"
   >
-    <!-- Emoji -->
+    <!-- Emoji + Name (tappable for detail) -->
+    <button class="flex items-center gap-3 flex-1 min-w-0 text-left" @click="$emit('detail')">
     <div
       class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
       :class="mode === 'future' ? 'bg-elevated/50' : 'bg-elevated'"
@@ -66,6 +68,8 @@ const streak = computed(() => getStreak(props.item.habit))
         {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} sem.
       </span>
     </div>
+
+    </button>
 
     <!-- Editable: interactive check circle -->
     <button

@@ -45,6 +45,14 @@ const cardMode = computed(() => {
   return 'editable' // past and today are both interactive
 })
 
+// Habit detail sheet
+const selectedHabit = ref<Habit | null>(null)
+const isDetailOpen = ref(false)
+function openDetail(habit: Habit) {
+  selectedHabit.value = habit
+  isDetailOpen.value = true
+}
+
 // Habit creation
 const { addHabit } = useHabits()
 const toast = useToast()
@@ -168,6 +176,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
                 :item="item"
                 :mode="cardMode"
                 @toggle="toggleHabit(item.habit.id)"
+                @detail="openDetail(item.habit)"
               />
             </div>
           </div>
@@ -198,6 +207,12 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         </div>
       </Transition>
     </div>
+
+    <!-- Habit detail sheet -->
+    <HabitDetailSheet
+      v-model:open="isDetailOpen"
+      :habit="selectedHabit"
+    />
 
     <!-- FAB -->
     <button

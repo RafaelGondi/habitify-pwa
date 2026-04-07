@@ -52,11 +52,55 @@ export function useStreak() {
     return streak
   }
 
-  return { getStreak }
+  function getLongestStreak(habit: Habit): number {
+    const todayStr = toDateString(new Date())
+    const habitStart = habit.createdAt.slice(0, 10)
+    let longest = 0
+    let running = 0
+    let current = habitStart
+
+    while (current <= todayStr) {
+      const date = new Date(current + 'T12:00:00')
+
+      if (habit.archivedAt && current >= habit.archivedAt.slice(0, 10)) {
+        current = nextDay(current)
+        continue
+      }
+
+      if (!isHabitDueOn(habit, date)) {
+        current = nextDay(current)
+        continue
+      }
+
+      const completed = data.value.completions.some(
+        c => c.habitId === habit.id && c.date === current,
+      )
+
+      if (completed) {
+        running++
+        if (running > longest) longest = running
+      }
+      else if (current < todayStr) {
+        running = 0
+      }
+
+      current = nextDay(current)
+    }
+
+    return longest
+  }
+
+  return { getStreak, getLongestStreak }
 }
 
 function prevDay(dateStr: string): string {
   const d = new Date(dateStr + 'T12:00:00')
   d.setDate(d.getDate() - 1)
+  return toDateString(d)
+}
+
+function nextDay(dateStr: string): string {
+  const d = new Date(dateStr + 'T12:00:00')
+  d.setDate(d.getDate() + 1)
   return toDateString(d)
 }
