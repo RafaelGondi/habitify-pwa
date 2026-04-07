@@ -31,7 +31,7 @@ export default defineNuxtConfig({
       name: 'Habitify',
       short_name: 'Habitify',
       description: 'Acompanhe seus hábitos diários',
-      theme_color: '#7c3aed',
+      theme_color: '#0d9488',
       background_color: '#09090b',
       display: 'standalone',
       orientation: 'portrait',
