@@ -4,6 +4,13 @@ import type { Habit } from '~/types'
 const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
 const showArchived = ref(false)
 const confirmDeleteId = ref<string | null>(null)
+
+function handleDelete() {
+  if (!confirmDeleteId.value) return
+  deleteHabit(confirmDeleteId.value)
+  confirmDeleteId.value = null
+  toast.add({ title: 'Hábito excluído', icon: 'i-lucide-trash-2', color: 'neutral' })
+}
 const { exportJSON, importJSON } = useExport()
 const toast = useToast()
 
@@ -263,7 +270,7 @@ const { $pwa } = useNuxtApp()
             color="error"
             class="flex-1"
             icon="i-lucide-trash-2"
-            @click="() => { deleteHabit(confirmDeleteId!); confirmDeleteId = null; toast.add({ title: 'Hábito excluído', icon: 'i-lucide-trash-2', color: 'neutral' }) }"
+            @click="handleDelete"
           >
             Excluir
           </UButton>
