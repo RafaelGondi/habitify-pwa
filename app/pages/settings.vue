@@ -59,15 +59,8 @@ const { $pwa } = useNuxtApp()
   <div class="flex flex-col h-full overflow-y-auto">
     <!-- Header -->
     <header class="sticky top-0 z-10 bg-background/90 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
-      <div class="flex items-center justify-between h-14">
+      <div class="flex items-center h-14">
         <h1 class="font-bold text-lg">Hábitos</h1>
-        <UButton
-          icon="i-lucide-plus"
-          variant="ghost"
-          color="neutral"
-          size="sm"
-          @click="openAdd"
-        />
       </div>
     </header>
 
@@ -175,6 +168,15 @@ const { $pwa } = useNuxtApp()
         </div>
       </section>
     </div>
+
+    <!-- FAB -->
+    <button
+      class="fixed bottom-20 right-4 z-20 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
+      style="bottom: calc(env(safe-area-inset-bottom, 0px) + 4.5rem)"
+      @click="openAdd"
+    >
+      <UIcon name="i-lucide-plus" class="text-2xl" />
+    </button>
 
     <!-- Modal -->
     <UModal v-model:open="isModalOpen" :title="modalTitle">
