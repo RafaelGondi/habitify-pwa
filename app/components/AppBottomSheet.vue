@@ -42,7 +42,8 @@ function onHandleTouchEnd(e: TouchEvent) {
     <Transition name="bs-slide">
       <div
         v-if="open"
-        class="fixed bottom-0 z-50 w-full bg-background rounded-t-3xl flex flex-col shadow-2xl"
+        class="fixed bottom-0 z-50 w-full rounded-t-3xl flex flex-col shadow-2xl"
+        style="background-color: var(--ui-bg);"
         style="
           max-width: 480px;
           left: 50%;
