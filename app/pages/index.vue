@@ -95,18 +95,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 
         <!-- Date label -->
         <div class="flex-1 text-center">
-          <div class="flex items-center justify-center gap-2">
-            <h1 class="font-bold text-lg leading-tight">{{ dateLabel }}</h1>
-            <Transition name="fade">
-              <button
-                v-if="isNotToday"
-                class="text-xs font-medium px-2 py-0.5 rounded-full bg-primary/15 text-primary"
-                @click="goToToday"
-              >
-                Hoje
-              </button>
-            </Transition>
-          </div>
+          <h1 class="font-bold text-lg leading-tight">{{ dateLabel }}</h1>
           <p class="text-xs text-muted capitalize leading-tight">{{ dateSub }}</p>
         </div>
 
@@ -131,6 +120,18 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         <!-- Spacer to keep layout balanced when button is hidden -->
         <div v-else class="w-8" />
       </div>
+
+      <!-- Back to today strip -->
+      <Transition name="fade">
+        <button
+          v-if="isNotToday"
+          class="w-full flex items-center justify-center gap-1.5 py-1.5 text-xs font-medium text-primary bg-primary/8 hover:bg-primary/12 transition-colors"
+          @click="goToToday"
+        >
+          <UIcon name="i-lucide-calendar-check" class="text-sm" />
+          Ir para hoje
+        </button>
+      </Transition>
 
       <!-- Progress bar (past + today only) -->
       <div v-if="!isFuture && dueHabits.length" class="px-4 pb-3">
