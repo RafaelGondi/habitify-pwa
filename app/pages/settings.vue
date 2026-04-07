@@ -182,16 +182,14 @@ const { $pwa } = useNuxtApp()
       <UIcon name="i-lucide-plus" class="text-2xl" />
     </button>
 
-    <!-- Modal -->
-    <UModal v-model:open="isModalOpen" :title="modalTitle">
-      <template #body>
-        <HabitForm
-          :key="modalKey"
-          :habit="editingHabit"
-          @submit="handleSubmit"
-          @cancel="isModalOpen = false"
-        />
-      </template>
-    </UModal>
+    <!-- Bottom sheet -->
+    <AppBottomSheet v-model:open="isModalOpen" :title="modalTitle">
+      <HabitForm
+        :key="modalKey"
+        :habit="editingHabit"
+        @submit="handleSubmit"
+        @cancel="isModalOpen = false"
+      />
+    </AppBottomSheet>
   </div>
 </template>

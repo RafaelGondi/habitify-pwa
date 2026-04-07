@@ -224,15 +224,13 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       <UIcon name="i-lucide-plus" class="text-2xl" />
     </button>
 
-    <!-- Modal -->
-    <UModal v-model:open="isModalOpen" title="Novo hábito">
-      <template #body>
-        <HabitForm
-          @submit="handleHabitSubmit"
-          @cancel="isModalOpen = false"
-        />
-      </template>
-    </UModal>
+    <!-- Bottom sheet: new habit -->
+    <AppBottomSheet v-model:open="isModalOpen" title="Novo hábito">
+      <HabitForm
+        @submit="handleHabitSubmit"
+        @cancel="isModalOpen = false"
+      />
+    </AppBottomSheet>
   </div>
 </template>
 

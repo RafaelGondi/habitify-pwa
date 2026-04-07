@@ -101,9 +101,8 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'] // Mon→Sun
 </script>
 
 <template>
-  <UModal :open="open" :title="habit ? `${habit.emoji} ${habit.name}` : ''" @update:open="$emit('update:open', $event)">
-    <template #body>
-      <div v-if="habit" class="flex flex-col gap-5 pb-2">
+  <AppBottomSheet :open="open" :title="habit ? `${habit.emoji} ${habit.name}` : ''" @update:open="$emit('update:open', $event)">
+    <div v-if="habit" class="flex flex-col gap-5 px-5 pt-1 pb-6">
         <!-- Stats row -->
         <div class="grid grid-cols-3 gap-2">
           <div class="flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-elevated/50 py-3">
@@ -184,7 +183,6 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'] // Mon→Sun
             </div>
           </div>
         </div>
-      </div>
-    </template>
-  </UModal>
+    </div>
+  </AppBottomSheet>
 </template>
