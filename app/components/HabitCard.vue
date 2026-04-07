@@ -12,6 +12,9 @@ defineEmits<{
 }>()
 
 const isEditable = computed(() => !props.mode || props.mode === 'editable')
+
+const { getStreak } = useStreak()
+const streak = computed(() => getStreak(props.item.habit))
 </script>
 
 <template>
@@ -27,7 +30,7 @@ const isEditable = computed(() => !props.mode || props.mode === 'editable')
       {{ item.habit.emoji }}
     </div>
 
-    <!-- Name -->
+    <!-- Name + streak -->
     <div class="flex-1 min-w-0">
       <p
         class="font-medium text-base truncate"
@@ -37,6 +40,10 @@ const isEditable = computed(() => !props.mode || props.mode === 'editable')
         ]"
       >
         {{ item.habit.name }}
+      </p>
+      <p v-if="streak >= 1 && mode !== 'future'" class="text-xs text-muted flex items-center gap-0.5 mt-0.5">
+        <span>🔥</span>
+        <span>{{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
       </p>
     </div>
 
