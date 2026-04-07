@@ -10,6 +10,7 @@ const props = defineProps<{
 defineEmits<{
   toggle: []
   detail: []
+  skip: []
 }>()
 
 const isEditable = computed(() => !props.mode || props.mode === 'editable')
@@ -21,7 +22,10 @@ const streak = computed(() => getStreak(props.item.habit))
 <template>
   <div
     class="flex items-center gap-3 px-4 py-3 rounded-xl"
-    :class="item.completed && mode !== 'future' ? 'opacity-55' : ''"
+    :class="[
+      item.completed && mode !== 'future' ? 'opacity-55' : '',
+      item.skipped ? 'opacity-40' : '',
+    ]"
   >
     <!-- Emoji + Name (tappable for detail) -->
     <button class="flex items-center gap-3 flex-1 min-w-0 text-left" @click="$emit('detail')">
@@ -71,17 +75,33 @@ const streak = computed(() => getStreak(props.item.habit))
 
     </button>
 
-    <!-- Editable: interactive check circle -->
-    <button
-      v-if="isEditable"
-      class="w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
-      :class="item.completed
-        ? 'bg-primary border-primary'
-        : 'border-accented hover:border-primary/60'"
-      @click="$emit('toggle')"
-    >
-      <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />
-    </button>
+    <!-- Editable: check + optional skip -->
+    <div v-if="isEditable" class="flex items-center gap-1.5 shrink-0">
+      <!-- Skip button (only when canSkip or already skipped) -->
+      <button
+        v-if="item.canSkip || item.skipped"
+        class="h-7 px-2 rounded-full text-xs font-medium transition-all active:scale-95 flex items-center gap-1"
+        :class="item.skipped
+          ? 'bg-elevated text-muted border border-default'
+          : 'bg-elevated/60 text-muted hover:bg-elevated border border-dashed border-muted/50'"
+        @click="$emit('skip')"
+      >
+        <UIcon :name="item.skipped ? 'i-lucide-undo-2' : 'i-lucide-forward'" class="text-xs" />
+        <span>{{ item.skipped ? 'desfazer' : 'skip' }}</span>
+      </button>
+
+      <!-- Check circle (hidden when skipped) -->
+      <button
+        v-if="!item.skipped"
+        class="w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
+        :class="item.completed
+          ? 'bg-primary border-primary'
+          : 'border-accented hover:border-primary/60'"
+        @click="$emit('toggle')"
+      >
+        <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />
+      </button>
+    </div>
 
     <!-- Past: static ✓ or ✗ -->
     <div

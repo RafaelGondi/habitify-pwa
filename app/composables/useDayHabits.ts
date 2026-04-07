@@ -3,19 +3,20 @@ import type { HabitWithStatus } from '~/types'
 export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
   const { data } = useStorage()
   const { toggle } = useCompletions()
+  const { skipHabit, unskipHabit } = useSkips()
 
   const todayStr = toDateString(new Date())
 
   const isToday = computed(() => dateStr.value === todayStr)
   const isPast = computed(() => dateStr.value < todayStr)
   const isFuture = computed(() => dateStr.value > todayStr)
-  // Past and today are both editable (retroactive check-off is allowed)
   const isEditable = computed(() => !isFuture.value)
 
   const dateObj = computed(() => new Date(dateStr.value + 'T12:00:00'))
 
   const dueHabits = computed((): HabitWithStatus[] => {
     const completions = data.value.completions.filter(c => c.date === dateStr.value)
+    const skips = (data.value.skips ?? []).filter(s => s.date === dateStr.value)
     const weekStart = getWeekStart(dateStr.value)
     const weekEnd = getWeekEnd(dateStr.value)
     const weekCompletions = data.value.completions.filter(
@@ -44,40 +45,48 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
       .sort((a, b) => a.order - b.order)
       .map((h) => {
         const completedToday = completions.some(c => c.habitId === h.id)
+        const skipped = skips.some(s => s.habitId === h.id)
+
         if (h.recurrence.type === 'weekly_x') {
           const total = h.recurrence.timesPerWeek ?? 1
           const done = weekCompletions.filter(c => c.habitId === h.id).length
+          const allowSkip = !completedToday && !skipped && canSkipWeeklyX(dateStr.value, done, total)
           return {
             habit: h,
             completed: completedToday || done >= total,
             completionId: completions.find(c => c.habitId === h.id)?.id,
             weeklyProgress: { done, total },
+            skipped,
+            canSkip: allowSkip,
           }
         }
         return {
           habit: h,
           completed: completedToday,
           completionId: completions.find(c => c.habitId === h.id)?.id,
+          skipped: false,
+          canSkip: false,
         }
       })
   })
 
-  const completedCount = computed(() => dueHabits.value.filter(h => h.completed).length)
+  // Skipped habits are excluded from completion rate
+  const activeHabits = computed(() => dueHabits.value.filter(h => !h.skipped))
+  const completedCount = computed(() => activeHabits.value.filter(h => h.completed).length)
 
   const completionRate = computed(() => {
-    if (!dueHabits.value.length || isFuture.value) return 0
-    return completedCount.value / dueHabits.value.length
+    if (!activeHabits.value.length || isFuture.value) return 0
+    return completedCount.value / activeHabits.value.length
   })
 
   const allDone = computed(
-    () => !isFuture.value && dueHabits.value.length > 0 && dueHabits.value.every(h => h.completed),
+    () => !isFuture.value && activeHabits.value.length > 0 && activeHabits.value.every(h => h.completed),
   )
 
   function toggleHabit(habitId: string) {
     if (!isEditable.value) return
     const item = dueHabits.value.find(h => h.habit.id === habitId)
     if (!item) return
-    // For weekly_x: block toggle if quota met and not completed today
     if (item.habit.recurrence.type === 'weekly_x' && item.weeklyProgress) {
       const { done, total } = item.weeklyProgress
       const completedToday = !!item.completionId
@@ -86,5 +95,17 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
     toggle(habitId, dateStr.value)
   }
 
-  return { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit }
+  function toggleSkip(habitId: string) {
+    if (!isEditable.value) return
+    const item = dueHabits.value.find(h => h.habit.id === habitId)
+    if (!item) return
+    if (item.skipped) {
+      unskipHabit(habitId, dateStr.value)
+    }
+    else if (item.canSkip) {
+      skipHabit(habitId, dateStr.value)
+    }
+  }
+
+  return { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip }
 }

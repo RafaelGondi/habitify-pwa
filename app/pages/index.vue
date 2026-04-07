@@ -37,7 +37,7 @@ function onTouchEnd(e: TouchEvent) {
 }
 
 // Day data
-const { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit } = useDayHabits(currentDateStr)
+const { dueHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
 
 // Card mode for HabitCard
 const cardMode = computed(() => {
@@ -176,6 +176,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
                 :item="item"
                 :mode="cardMode"
                 @toggle="toggleHabit(item.habit.id)"
+                @skip="toggleSkip(item.habit.id)"
                 @detail="openDetail(item.habit)"
               />
             </div>

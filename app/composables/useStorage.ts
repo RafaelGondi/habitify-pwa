@@ -3,7 +3,7 @@ import type { AppData } from '~/types'
 const STORAGE_KEY = 'habitify-data'
 
 function defaultData(): AppData {
-  return { version: 1, habits: [], completions: [] }
+  return { version: 1, habits: [], completions: [], skips: [] }
 }
 
 export function useStorage() {
@@ -24,6 +24,7 @@ export function useStorage() {
       const raw = localStorage.getItem(STORAGE_KEY)
       if (raw) {
         const parsed = JSON.parse(raw) as AppData
+        if (!parsed.skips) parsed.skips = [] // migrate old data
         data.value = parsed
       }
     }
