@@ -1,6 +1,17 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
 
+/*
+  Prevent color-scheme from signaling the OS to change system-wide appearance.
+  Declaring "light dark" tells the browser both are supported without forcing
+  either direction — the app's visual theme is controlled by the .dark class only.
+*/
+html,
+html.light,
+html.dark {
+  color-scheme: light dark !important;
+}
+
 /* Bottom nav height compensation */
 .bottom-nav-offset {
   padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
