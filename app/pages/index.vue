@@ -141,7 +141,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           </span>
           <span class="text-xs font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
         </div>
-        <UProgress :value="completionRate * 100" color="primary" size="xs" />
+        <UProgress :value="completionRate * 100" color="primary" size="md" class="progress-no-anim" />
       </div>
     </header>
 
@@ -224,6 +224,12 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 </template>
 
 <style scoped>
+/* Kill progress bar animation */
+.progress-no-anim :deep([data-slot="indicator"]) {
+  animation: none !important;
+  transition: none !important;
+}
+
 /* Slide to next day (swipe left) */
 .slide-left-enter-active,
 .slide-left-leave-active {
