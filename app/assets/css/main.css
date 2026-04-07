@@ -1,0 +1,7 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+/* Bottom nav height compensation */
+.bottom-nav-offset {
+  padding-bottom: calc(4rem + env(safe-area-inset-bottom, 0px));
+}
