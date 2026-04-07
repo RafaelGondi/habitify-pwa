@@ -9,6 +9,12 @@ export function useHabits() {
       .sort((a, b) => a.order - b.order),
   )
 
+  const archivedHabits = computed(() =>
+    [...data.value.habits]
+      .filter(h => !!h.archivedAt)
+      .sort((a, b) => (b.archivedAt ?? '').localeCompare(a.archivedAt ?? '')),
+  )
+
   function addHabit(input: Omit<Habit, 'id' | 'order'> & { createdAt?: string }): Habit {
     const habit: Habit = {
       ...input,
@@ -30,5 +36,9 @@ export function useHabits() {
     updateHabit(id, { archivedAt: new Date().toISOString() })
   }
 
-  return { activeHabits, addHabit, updateHabit, archiveHabit }
+  function unarchiveHabit(id: string) {
+    updateHabit(id, { archivedAt: undefined })
+  }
+
+  return { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit }
 }

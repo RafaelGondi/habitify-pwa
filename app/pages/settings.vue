@@ -1,7 +1,8 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
 
-const { activeHabits, addHabit, updateHabit, archiveHabit } = useHabits()
+const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit } = useHabits()
+const showArchived = ref(false)
 const { exportJSON, importJSON } = useExport()
 const toast = useToast()
 
@@ -114,6 +115,53 @@ const { $pwa } = useNuxtApp()
             Adicionar hábito
           </UButton>
         </div>
+      </section>
+
+      <!-- Archived habits -->
+      <section v-if="archivedHabits.length" class="border-t border-default pt-6">
+        <button
+          class="flex items-center justify-between w-full mb-3"
+          @click="showArchived = !showArchived"
+        >
+          <h2 class="text-xs font-semibold text-muted uppercase tracking-wider">
+            Arquivados ({{ archivedHabits.length }})
+          </h2>
+          <UIcon
+            :name="showArchived ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
+            class="text-muted text-sm"
+          />
+        </button>
+        <Transition
+          enter-active-class="transition-all duration-200"
+          enter-from-class="opacity-0 -translate-y-1"
+          enter-to-class="opacity-100 translate-y-0"
+          leave-active-class="transition-all duration-150"
+          leave-from-class="opacity-100 translate-y-0"
+          leave-to-class="opacity-0 -translate-y-1"
+        >
+          <div v-if="showArchived" class="flex flex-col gap-2">
+            <div
+              v-for="habit in archivedHabits"
+              :key="habit.id"
+              class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-elevated/20 border border-default opacity-60"
+            >
+              <div class="text-2xl w-10 h-10 flex items-center justify-center rounded-xl bg-background shrink-0">
+                {{ habit.emoji }}
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="font-medium text-sm truncate">{{ habit.name }}</p>
+                <p class="text-xs text-muted">{{ recurrenceLabel(habit.recurrence.type) }}</p>
+              </div>
+              <UButton
+                icon="i-lucide-archive-restore"
+                variant="ghost"
+                color="neutral"
+                size="xs"
+                @click="unarchiveHabit(habit.id)"
+              />
+            </div>
+          </div>
+        </Transition>
       </section>
 
       <!-- Appearance section -->
