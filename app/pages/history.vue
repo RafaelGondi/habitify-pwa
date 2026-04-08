@@ -5,7 +5,7 @@ const { days, hasMore, loadMore } = useHistoryDays()
 <template>
   <div class="flex flex-col h-full overflow-y-auto">
     <!-- Header -->
-    <header class="sticky top-0 z-10 bg-zinc-200/95 dark:bg-zinc-950/95 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
+    <header class="sticky top-0 z-10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
       <div class="flex items-center h-14">
         <h1 class="font-bold text-lg">Histórico</h1>
       </div>
