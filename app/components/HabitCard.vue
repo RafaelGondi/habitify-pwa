@@ -98,9 +98,9 @@ const habitColor = computed(() => getHabitColor(props.item.habit.color))
       <button
         v-if="!item.skipped"
         class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
-        :style="item.completed
-          ? { backgroundColor: habitColor.hex, borderColor: habitColor.hex }
-          : { borderColor: habitColor.hex + '60' }"
+        :class="item.completed
+          ? 'bg-primary border-primary'
+          : 'border-accented hover:border-primary/60'"
         @click="$emit('toggle')"
       >
         <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />

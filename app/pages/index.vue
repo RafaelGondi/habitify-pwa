@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
+import { getHabitColor } from '~/utils/colors'
 
 const todayStr = toDateString(new Date())
 
@@ -172,10 +173,9 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
               :key="item.habit.id"
               class="rounded-2xl border transition-colors"
               :class="item.skipped
-                ? 'bg-white/40 dark:bg-zinc-800/40 border-zinc-200 dark:border-zinc-700/50'
-                : item.completed
-                  ? 'bg-primary/10 border-primary/20'
-                  : 'bg-white dark:bg-zinc-800 border-zinc-200 dark:border-zinc-700'"
+                ? 'border-zinc-200 dark:border-zinc-700/50'
+                : 'border-zinc-200 dark:border-zinc-700'"
+              :style="{ backgroundColor: getHabitColor(item.habit.color).hex + (item.skipped ? '0D' : item.completed ? '2A' : '18') }"
             >
               <HabitCard
                 :item="item"
