@@ -87,7 +87,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
   <div class="flex flex-col h-full">
     <!-- Header -->
     <header
-      class="shrink-0 bg-elevated/95 backdrop-blur-sm border-b border-default"
+      class="shrink-0 bg-zinc-100/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-default"
       style="padding-top: env(safe-area-inset-top, 0px)"
     >
       <div class="flex items-center gap-2 px-2 h-14">
