@@ -170,7 +170,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
             <div
               v-for="item in dueHabits"
               :key="item.habit.id"
-              class="rounded-2xl bg-elevated/40"
+              class="rounded-2xl bg-elevated border border-default/50"
             >
               <HabitCard
                 :item="item"
