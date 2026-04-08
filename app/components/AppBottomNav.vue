@@ -13,7 +13,7 @@ function isActive(to: string) {
 </script>
 
 <template>
-  <nav class="fixed bottom-0 left-0 right-0 z-50 bg-background/95 backdrop-blur-sm border-t border-default">
+  <nav class="shrink-0 bg-background/95 backdrop-blur-sm border-t border-default">
     <div class="flex max-w-md mx-auto" style="padding-bottom: env(safe-area-inset-bottom, 0px)">
       <NuxtLink
         v-for="tab in tabs"
