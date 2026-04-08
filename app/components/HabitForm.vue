@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Habit, HabitRecurrence, RecurrenceType, WeekDay } from '~/types'
+import { DEFAULT_COLOR, HABIT_COLORS } from '~/utils/colors'
 
 const props = defineProps<{
   habit?: Habit
@@ -43,6 +44,7 @@ const DAYS: Array<{ value: WeekDay, label: string }> = [
 
 const name = ref(props.habit?.name ?? '')
 const emoji = ref(props.habit?.emoji ?? '🎯')
+const color = ref(props.habit?.color ?? DEFAULT_COLOR)
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
 const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
@@ -82,6 +84,7 @@ function handleSubmit() {
   emit('submit', {
     name: name.value.trim(),
     emoji: emoji.value,
+    color: color.value,
     recurrence,
     createdAt: new Date(startDate.value + 'T12:00:00').toISOString(),
   })
@@ -114,6 +117,27 @@ function handleSubmit() {
           @click="emoji = e"
         >
           {{ e }}
+        </button>
+      </div>
+    </div>
+
+    <!-- Color picker -->
+    <div>
+      <label class="block text-sm font-medium mb-1.5 text-default">Cor</label>
+      <div class="flex gap-2 flex-wrap">
+        <button
+          v-for="c in HABIT_COLORS"
+          :key="c.id"
+          type="button"
+          class="w-8 h-8 rounded-full transition-transform active:scale-90 relative"
+          :style="{ backgroundColor: c.hex }"
+          @click="color = c.id"
+        >
+          <span
+            v-if="color === c.id"
+            class="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-offset-background"
+            :style="{ boxShadow: `0 0 0 2px white, 0 0 0 4px ${c.hex}` }"
+          />
         </button>
       </div>
     </div>

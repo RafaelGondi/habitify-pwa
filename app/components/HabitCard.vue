@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { HabitWithStatus } from '~/types'
+import { getHabitColor } from '~/utils/colors'
 
 const props = defineProps<{
   item: HabitWithStatus
@@ -17,6 +18,8 @@ const isEditable = computed(() => !props.mode || props.mode === 'editable')
 
 const { getStreak } = useStreak()
 const streak = computed(() => getStreak(props.item.habit))
+
+const habitColor = computed(() => getHabitColor(props.item.habit.color))
 </script>
 
 <template>
@@ -31,7 +34,8 @@ const streak = computed(() => getStreak(props.item.habit))
     <button class="flex items-center gap-3 flex-1 min-w-0 text-left" @click="$emit('detail')">
     <div
       class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
-      :class="mode === 'future' ? 'bg-elevated/50' : 'bg-elevated'"
+      :style="{ backgroundColor: mode === 'future' ? undefined : habitColor.light }"
+      :class="mode === 'future' ? 'bg-elevated/50' : ''"
     >
       {{ item.habit.emoji }}
     </div>
@@ -94,9 +98,9 @@ const streak = computed(() => getStreak(props.item.habit))
       <button
         v-if="!item.skipped"
         class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
-        :class="item.completed
-          ? 'bg-primary border-primary'
-          : 'border-accented hover:border-primary/60'"
+        :style="item.completed
+          ? { backgroundColor: habitColor.hex, borderColor: habitColor.hex }
+          : { borderColor: habitColor.hex + '60' }"
         @click="$emit('toggle')"
       >
         <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />
