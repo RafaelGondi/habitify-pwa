@@ -93,7 +93,7 @@ const streak = computed(() => getStreak(props.item.habit))
       <!-- Check circle (hidden when skipped) -->
       <button
         v-if="!item.skipped"
-        class="w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
+        class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
         :class="item.completed
           ? 'bg-primary border-primary'
           : 'border-accented hover:border-primary/60'"
