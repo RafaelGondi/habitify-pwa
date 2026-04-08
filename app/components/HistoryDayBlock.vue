@@ -7,7 +7,8 @@ const props = defineProps<{
 }>()
 
 const isExpanded = ref(props.defaultExpanded ?? false)
-const completedCount = computed(() => props.day.habits.filter(h => h.completed).length)
+const activeHabits = computed(() => props.day.habits.filter(h => !h.skipped))
+const completedCount = computed(() => activeHabits.value.filter(h => h.completed).length)
 const pct = computed(() => Math.round(props.day.completionRate * 100))
 </script>
 
@@ -30,7 +31,7 @@ const pct = computed(() => Math.round(props.day.completionRate * 100))
         </span>
       </div>
       <div class="flex items-center gap-2 text-muted">
-        <span class="text-xs">{{ completedCount }}/{{ day.habits.length }}</span>
+        <span class="text-xs">{{ completedCount }}/{{ activeHabits.length }}</span>
         <UIcon
           :name="isExpanded ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
           class="text-sm"

@@ -40,17 +40,48 @@ export function useHistoryDays() {
       if (!relevantHabits.length) continue
 
       const completions = data.value.completions.filter(c => c.date === dateStr)
-      const habits: HabitWithStatus[] = relevantHabits.map(h => ({
-        habit: h,
-        completed: completions.some(c => c.habitId === h.id),
-        completionId: completions.find(c => c.habitId === h.id)?.id,
-      }))
+      const skipsForDate = (data.value.skips ?? []).filter(s => s.date === dateStr)
+      const weekStart = getWeekStart(dateStr)
 
-      result.push({
-        date: dateStr,
-        habits,
-        completionRate: habits.filter(h => h.completed).length / habits.length,
+      const habits: HabitWithStatus[] = relevantHabits.map((h) => {
+        const completedToday = completions.some(c => c.habitId === h.id)
+        const skipped = skipsForDate.some(s => s.habitId === h.id)
+
+        if (h.recurrence.type === 'weekly_x') {
+          const total = h.recurrence.timesPerWeek ?? 1
+          // completions this week strictly before this date
+          const weekDoneBefore = data.value.completions.filter(
+            c => c.habitId === h.id && c.date >= weekStart && c.date < dateStr,
+          ).length
+          const weekDoneTotal = weekDoneBefore + (completedToday ? 1 : 0)
+          const couldSkip = canSkipWeeklyX(dateStr, weekDoneBefore, total)
+
+          return {
+            habit: h,
+            completed: completedToday || weekDoneTotal >= total,
+            completionId: completions.find(c => c.habitId === h.id)?.id,
+            weeklyProgress: { done: weekDoneTotal, total },
+            skipped,
+            canSkip: couldSkip,
+          }
+        }
+
+        return {
+          habit: h,
+          completed: completedToday,
+          completionId: completions.find(c => c.habitId === h.id)?.id,
+          skipped: false,
+          canSkip: false,
+        }
       })
+
+      // Exclude skipped from rate (same rule as today view)
+      const activeHabits = habits.filter(h => !h.skipped)
+      const completionRate = activeHabits.length
+        ? activeHabits.filter(h => h.completed).length / activeHabits.length
+        : 0
+
+      result.push({ date: dateStr, habits, completionRate })
     }
 
     return result

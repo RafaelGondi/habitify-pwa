@@ -17,7 +17,7 @@ const { days, hasMore, loadMore } = useHistoryDays()
         v-for="(day, index) in days"
         :key="day.date"
         :day="day"
-        :default-expanded="index < 3"
+        :default-expanded="false"
       />
 
       <!-- Load more -->
