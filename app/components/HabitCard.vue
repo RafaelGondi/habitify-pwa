@@ -20,6 +20,11 @@ const { getStreak } = useStreak()
 const streak = computed(() => getStreak(props.item.habit))
 
 const habitColor = computed(() => getHabitColor(props.item.habit.color))
+
+function handleToggle() {
+  if (!props.item.completed) navigator.vibrate?.(50)
+  emit('toggle')
+}
 </script>
 
 <template>
@@ -101,7 +106,7 @@ const habitColor = computed(() => getHabitColor(props.item.habit.color))
         :class="item.completed
           ? 'bg-primary border-primary'
           : 'border-accented hover:border-primary/60'"
-        @click="$emit('toggle')"
+        @click="handleToggle"
       >
         <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />
       </button>
