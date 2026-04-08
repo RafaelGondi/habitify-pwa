@@ -171,11 +171,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
             <div
               v-for="item in dueHabits"
               :key="item.habit.id"
-              class="rounded-2xl border transition-colors"
-              :class="item.skipped
-                ? 'border-zinc-200 dark:border-zinc-700/50'
-                : 'border-zinc-200 dark:border-zinc-700'"
-              :style="{ backgroundColor: getHabitColor(item.habit.color).hex + (item.skipped ? '0D' : item.completed ? '2A' : '18') }"
+              class="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 transition-colors"
             >
               <HabitCard
                 :item="item"
