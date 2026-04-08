@@ -55,14 +55,22 @@ const pct = computed(() => Math.round(props.day.completionRate * 100))
           class="flex items-center gap-3 px-4 py-2.5"
           :class="{ 'border-t border-default/50': day.habits.indexOf(item) > 0 }"
         >
-          <span class="text-lg">{{ item.habit.emoji }}</span>
+          <span class="text-lg" :class="item.skipped ? 'opacity-40' : ''">{{ item.habit.emoji }}</span>
           <span
             class="flex-1 text-sm"
-            :class="item.completed ? 'text-default' : 'text-muted line-through'"
+            :class="item.skipped
+              ? 'text-muted/60 italic'
+              : item.completed ? 'text-default' : 'text-muted line-through'"
           >
             {{ item.habit.name }}
           </span>
           <UIcon
+            v-if="item.skipped"
+            name="i-lucide-forward"
+            class="text-base shrink-0 text-amber-400"
+          />
+          <UIcon
+            v-else
             :name="item.completed ? 'i-lucide-check-circle-2' : 'i-lucide-circle'"
             class="text-base shrink-0"
             :class="item.completed ? 'text-primary' : 'text-muted'"
