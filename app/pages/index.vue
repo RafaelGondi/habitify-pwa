@@ -167,7 +167,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           </div>
 
           <!-- Habit list -->
-          <div v-if="dueHabits.length" class="px-3 pt-2 pb-4 flex flex-col gap-1">
+          <div v-if="dueHabits.length" class="px-3 pt-2 pb-4 flex flex-col gap-2">
             <div
               v-for="item in dueHabits"
               :key="item.habit.id"
