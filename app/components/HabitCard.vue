@@ -22,7 +22,9 @@ const streak = computed(() => getStreak(props.item.habit))
 const habitColor = computed(() => getHabitColor(props.item.habit.color))
 
 function handleToggle() {
-  if (!props.item.completed) navigator.vibrate?.(50)
+  if (!props.item.completed && 'vibrate' in navigator) {
+    navigator.vibrate(80)
+  }
   emit('toggle')
 }
 </script>
