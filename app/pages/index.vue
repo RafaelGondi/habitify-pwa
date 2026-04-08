@@ -219,7 +219,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
     <button
       v-if="isToday"
       class="fixed z-20 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-      style="bottom: 1rem; right: 1rem"
+      style="bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem); right: 1rem"
       @click="isModalOpen = true"
     >
       <UIcon name="i-lucide-plus" class="text-2xl" />
