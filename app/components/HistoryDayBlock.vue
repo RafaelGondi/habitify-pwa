@@ -6,7 +6,7 @@ const props = defineProps<{
   defaultExpanded?: boolean
 }>()
 
-const isExpanded = ref(props.defaultExpanded ?? true)
+const isExpanded = ref(props.defaultExpanded ?? false)
 const completedCount = computed(() => props.day.habits.filter(h => h.completed).length)
 const pct = computed(() => Math.round(props.day.completionRate * 100))
 </script>
