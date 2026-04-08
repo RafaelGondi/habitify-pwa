@@ -70,6 +70,13 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
       })
   })
 
+  const sortedHabits = computed(() => {
+    const pending = dueHabits.value.filter(h => !h.completed && !h.skipped)
+    const done = dueHabits.value.filter(h => h.completed && !h.skipped)
+    const skipped = dueHabits.value.filter(h => h.skipped)
+    return [...pending, ...done, ...skipped]
+  })
+
   // Skipped habits are excluded from completion rate
   const activeHabits = computed(() => dueHabits.value.filter(h => !h.skipped))
   const completedCount = computed(() => activeHabits.value.filter(h => h.completed).length)
@@ -107,5 +114,5 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
     }
   }
 
-  return { dueHabits, activeHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip }
+  return { dueHabits: sortedHabits, activeHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip }
 }
