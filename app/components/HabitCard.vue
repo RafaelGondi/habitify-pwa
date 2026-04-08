@@ -8,7 +8,7 @@ const props = defineProps<{
   mode?: 'editable' | 'past' | 'future'
 }>()
 
-defineEmits<{
+const emit = defineEmits<{
   toggle: []
   detail: []
   skip: []
