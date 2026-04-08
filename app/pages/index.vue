@@ -87,7 +87,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
   <div class="flex flex-col h-full">
     <!-- Header -->
     <header
-      class="shrink-0 bg-background/90 backdrop-blur-sm border-b border-default"
+      class="shrink-0 bg-elevated/95 backdrop-blur-sm border-b border-default"
       style="padding-top: env(safe-area-inset-top, 0px)"
     >
       <div class="flex items-center gap-2 px-2 h-14">
@@ -172,10 +172,10 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
               :key="item.habit.id"
               class="rounded-2xl border transition-colors"
               :class="item.skipped
-                ? 'bg-elevated/30 border-default/20'
+                ? 'bg-background/40 border-default/20'
                 : item.completed
-                  ? 'bg-primary/8 border-primary/20'
-                  : 'bg-elevated border-default/50'"
+                  ? 'bg-primary/10 border-primary/20'
+                  : 'bg-background border-default/60'"
             >
               <HabitCard
                 :item="item"
