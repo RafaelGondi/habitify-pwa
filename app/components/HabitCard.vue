@@ -23,7 +23,8 @@ const habitColor = computed(() => getHabitColor(props.item.habit.color))
 
 function handleToggle() {
   if (!props.item.completed && 'vibrate' in navigator) {
-    navigator.vibrate(80)
+    const result = navigator.vibrate([100, 30, 80])
+    console.log('[haptic] vibrate result:', result)
   }
   emit('toggle')
 }
