@@ -167,11 +167,14 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           </div>
 
           <!-- Habit list -->
-          <div v-if="dueHabits.length" class="px-3 pt-2 pb-4 flex flex-col gap-2">
+          <div v-if="dueHabits.length" class="px-3 pt-4 pb-4 flex flex-col gap-2">
             <div
               v-for="item in dueHabits"
               :key="item.habit.id"
-              class="rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800 transition-colors"
+              class="rounded-2xl border transition-colors"
+              :class="item.completed || item.skipped
+                ? 'border-zinc-200/60 dark:border-zinc-700/40 bg-zinc-50 dark:bg-zinc-800/50 opacity-60'
+                : 'border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800'"
             >
               <HabitCard
                 :item="item"
