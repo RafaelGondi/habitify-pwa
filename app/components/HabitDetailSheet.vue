@@ -141,11 +141,11 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'] // Mon→Sun
               <!-- Day labels -->
               <div class="flex flex-col gap-[3px] mr-0.5 justify-end" style="padding-bottom: 1px">
                 <div
-                  v-for="(label, i) in DAY_LABELS"
-                  :key="i"
+                  v-for="label in DAY_LABELS"
+                  :key="label"
                   class="h-3 w-3 text-[8px] text-muted flex items-center justify-center"
                 >
-                  {{ i % 2 === 0 ? label : '' }}
+                  {{ label }}
                 </div>
               </div>
 
