@@ -69,6 +69,9 @@ function openNoteModal(habit: Habit, item: typeof dueHabits.value[0]) {
 function handleSaveNote(note: string) {
   if (noteHabit.value) {
     setNote(noteHabit.value.id, currentDateStr.value, note)
+    if (noteHabitItem.value) {
+      noteHabitItem.value.note = note || undefined
+    }
   }
 }
 
