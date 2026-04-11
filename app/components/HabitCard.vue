@@ -90,15 +90,14 @@ function handleToggle() {
 
     <!-- Editable: check + optional skip + note -->
     <div v-if="isEditable" class="flex items-center gap-1.5 shrink-0">
-      <!-- Note button (only when completed) -->
+      <!-- Note button -->
       <button
-        v-if="item.completed"
-        class="h-7 w-7 rounded-full flex items-center justify-center transition-all active:scale-90"
+        class="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-90"
         @click="$emit('openNote')"
       >
         <UIcon
           name="i-lucide-sticky-note"
-          class="text-sm"
+          class="text-base"
           :class="item.note ? 'text-primary' : 'text-muted/50'"
         />
       </button>
