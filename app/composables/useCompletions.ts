@@ -21,9 +21,27 @@ export function useCompletions() {
     }
   }
 
+  function getCompletion(habitId: string, date: string): Completion | undefined {
+    return data.value.completions.find(c => c.habitId === habitId && c.date === date)
+  }
+
+  function setNote(habitId: string, date: string, note: string) {
+    const completion = getCompletion(habitId, date)
+    if (!completion) return
+
+    const updated = completion.note === note
+      ? completion
+      : { ...completion, note }
+
+    const completions = data.value.completions.map(
+      c => c.id === completion.id ? updated : c,
+    )
+    save({ completions })
+  }
+
   function completionsForDate(date: string) {
     return computed(() => data.value.completions.filter(c => c.date === date))
   }
 
-  return { toggle, completionsForDate }
+  return { toggle, getCompletion, setNote, completionsForDate }
 }

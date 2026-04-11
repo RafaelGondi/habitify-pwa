@@ -24,6 +24,7 @@ export interface Completion {
   habitId: string
   date: string // YYYY-MM-DD
   completedAt: string
+  note?: string
 }
 
 export interface Skip {
@@ -47,6 +48,7 @@ export interface HabitWithStatus {
   weeklyProgress?: { done: number, total: number }
   skipped?: boolean
   canSkip?: boolean
+  note?: string
 }
 
 export interface DayRecord {

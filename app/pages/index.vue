@@ -54,6 +54,24 @@ function openDetail(habit: Habit) {
   isDetailOpen.value = true
 }
 
+// Note modal
+const { setNote } = useCompletions()
+const noteModalOpen = ref(false)
+const noteHabit = ref<Habit | null>(null)
+const noteHabitItem = ref<typeof dueHabits.value[0] | null>(null)
+
+function openNoteModal(habit: Habit, item: typeof dueHabits.value[0]) {
+  noteHabit.value = habit
+  noteHabitItem.value = item
+  noteModalOpen.value = true
+}
+
+function handleSaveNote(note: string) {
+  if (noteHabit.value) {
+    setNote(noteHabit.value.id, currentDateStr.value, note)
+  }
+}
+
 // Habit creation
 const { addHabit } = useHabits()
 const toast = useToast()
@@ -182,6 +200,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
                 @toggle="toggleHabit(item.habit.id)"
                 @skip="toggleSkip(item.habit.id)"
                 @detail="openDetail(item.habit)"
+                @open-note="openNoteModal(item.habit, item)"
               />
             </div>
           </div>
@@ -236,6 +255,15 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         @cancel="isModalOpen = false"
       />
     </AppBottomSheet>
+
+    <!-- Note modal -->
+    <NoteModal
+      v-model:open="noteModalOpen"
+      :habit-name="noteHabit?.name ?? ''"
+      :habit-emoji="noteHabit?.emoji ?? ''"
+      :note="noteHabitItem?.note"
+      @save="handleSaveNote"
+    />
   </div>
 </template>
 

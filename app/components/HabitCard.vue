@@ -12,6 +12,7 @@ const emit = defineEmits<{
   toggle: []
   detail: []
   skip: []
+  openNote: []
 }>()
 
 const isEditable = computed(() => !props.mode || props.mode === 'editable')
@@ -87,8 +88,21 @@ function handleToggle() {
 
     </button>
 
-    <!-- Editable: check + optional skip -->
+    <!-- Editable: check + optional skip + note -->
     <div v-if="isEditable" class="flex items-center gap-1.5 shrink-0">
+      <!-- Note button (only when completed) -->
+      <button
+        v-if="item.completed"
+        class="h-7 w-7 rounded-full flex items-center justify-center transition-all active:scale-90"
+        @click="$emit('openNote')"
+      >
+        <UIcon
+          name="i-lucide-sticky-note"
+          class="text-sm"
+          :class="item.note ? 'text-primary' : 'text-muted/50'"
+        />
+      </button>
+
       <!-- Skip button (only when canSkip or already skipped) -->
       <button
         v-if="item.canSkip || item.skipped"

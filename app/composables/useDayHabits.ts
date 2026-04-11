@@ -44,7 +44,8 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
       })
       .sort((a, b) => a.order - b.order)
       .map((h) => {
-        const completedToday = completions.some(c => c.habitId === h.id)
+        const completion = completions.find(c => c.habitId === h.id)
+        const completedToday = !!completion
         const skipped = skips.some(s => s.habitId === h.id)
 
         if (h.recurrence.type === 'weekly_x') {
@@ -54,7 +55,8 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
           return {
             habit: h,
             completed: completedToday || done >= total,
-            completionId: completions.find(c => c.habitId === h.id)?.id,
+            completionId: completion?.id,
+            note: completion?.note,
             weeklyProgress: { done, total },
             skipped,
             canSkip: allowSkip,
@@ -63,7 +65,8 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
         return {
           habit: h,
           completed: completedToday,
-          completionId: completions.find(c => c.habitId === h.id)?.id,
+          completionId: completion?.id,
+          note: completion?.note,
           skipped: false,
           canSkip: false,
         }
