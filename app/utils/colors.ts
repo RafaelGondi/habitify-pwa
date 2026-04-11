@@ -17,6 +17,8 @@ export const HABIT_COLORS: HabitColor[] = [
   { id: 'green',  label: 'Verde',  hex: '#22c55e', light: '#dcfce7' },
   { id: 'cyan',   label: 'Ciano',  hex: '#06b6d4', light: '#cffafe' },
   { id: 'slate',  label: 'Cinza',  hex: '#64748b', light: '#f1f5f9' },
+  { id: 'gray',   label: 'Cinza Claro', hex: '#94a3b8', light: '#f8fafc' },
+  { id: 'white',  label: 'Branco', hex: '#e2e8f0', light: '#ffffff' },
   { id: 'rose',   label: 'Rosé',   hex: '#f43f5e', light: '#ffe4e6' },
 ]
 
