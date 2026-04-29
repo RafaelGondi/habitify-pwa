@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
+import { getHabitPeriodLabel } from '~/utils/periods'
 
 const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
 const showArchived = ref(false)
@@ -97,6 +98,9 @@ const { $pwa } = useNuxtApp()
                   ? `${habit.recurrence.timesPerWeek}x por semana`
                   : recurrenceLabel(habit.recurrence.type) }}
               </p>
+              <p class="text-xs text-primary/80 mt-0.5">
+                {{ getHabitPeriodLabel(habit.period) }}
+              </p>
             </div>
             <!-- Actions -->
             <div class="flex gap-1 shrink-0">
@@ -170,6 +174,9 @@ const { $pwa } = useNuxtApp()
               <div class="flex-1 min-w-0">
                 <p class="font-medium text-sm truncate">{{ habit.name }}</p>
                 <p class="text-xs text-muted">{{ recurrenceLabel(habit.recurrence.type) }}</p>
+                <p class="text-xs text-primary/80 mt-0.5">
+                  {{ getHabitPeriodLabel(habit.period) }}
+                </p>
               </div>
               <UButton
                 icon="i-lucide-archive-restore"

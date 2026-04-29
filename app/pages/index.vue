@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { Habit } from '~/types'
-import { getHabitColor } from '~/utils/colors'
+import type { Habit, HabitPeriod, HabitWithStatus } from '~/types'
+import { getCurrentPeriod, PERIOD_OPTIONS } from '~/utils/periods'
 
 const todayStr = toDateString(new Date())
 
@@ -38,7 +38,46 @@ function onTouchEnd(e: TouchEvent) {
 }
 
 // Day data
-const { dueHabits, activeHabits, completedCount, completionRate, allDone, isToday, isPast, isFuture, isEditable, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
+const { dueHabits, isToday, isPast, isFuture, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
+
+const selectedPeriod = ref<'all' | Exclude<HabitPeriod, 'anytime'>>(getCurrentPeriod())
+const currentPeriod = computed(() => getCurrentPeriod())
+const periodFilters = computed(() => [
+  { value: 'all' as const, label: 'Todos' },
+  ...PERIOD_OPTIONS
+    .filter(option => option.value !== 'anytime')
+    .map(option => ({ value: option.value, label: option.label })),
+])
+
+const filteredDueHabits = computed((): HabitWithStatus[] => {
+  if (selectedPeriod.value === 'all') return dueHabits.value
+
+  return dueHabits.value.filter((item) => {
+    const period = item.habit.period ?? 'anytime'
+    return period === 'anytime' || period === selectedPeriod.value
+  })
+})
+
+const filteredActiveHabits = computed(() => filteredDueHabits.value.filter(h => !h.skipped))
+const filteredCompletedCount = computed(() => filteredActiveHabits.value.filter(h => h.completed).length)
+const filteredCompletionRate = computed(() => {
+  if (!filteredActiveHabits.value.length || isFuture.value) return 0
+  return filteredCompletedCount.value / filteredActiveHabits.value.length
+})
+const filteredAllDone = computed(
+  () => !isFuture.value && filteredActiveHabits.value.length > 0 && filteredActiveHabits.value.every(h => h.completed)
+)
+const hasVisibleHabits = computed(() => filteredDueHabits.value.length > 0)
+const hasHabitsForDay = computed(() => dueHabits.value.length > 0)
+const selectedFilterLabel = computed(() =>
+  periodFilters.value.find(filter => filter.value === selectedPeriod.value)?.label ?? 'Todos'
+)
+
+watch(currentDateStr, () => {
+  if (selectedPeriod.value !== 'all') {
+    selectedPeriod.value = currentPeriod.value
+  }
+})
 
 // Card mode for HabitCard
 const cardMode = computed(() => {
@@ -151,15 +190,32 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         </button>
       </Transition>
 
+      <!-- Period filter -->
+      <div class="px-4 pb-3">
+        <div class="flex gap-2 overflow-x-auto no-scrollbar">
+          <button
+            v-for="filter in periodFilters"
+            :key="filter.value"
+            class="shrink-0 h-9 px-3 rounded-full text-sm font-medium transition-colors border"
+            :class="selectedPeriod === filter.value
+              ? 'bg-primary text-white border-primary'
+              : 'bg-white/80 dark:bg-zinc-900/80 text-muted border-default hover:text-default'"
+            @click="selectedPeriod = filter.value"
+          >
+            {{ filter.label }}
+          </button>
+        </div>
+      </div>
+
       <!-- Progress bar (past + today only) -->
-      <div v-if="!isFuture && activeHabits.length" class="px-4 pb-3">
+      <div v-if="!isFuture && filteredActiveHabits.length" class="px-4 pb-3">
         <div class="flex items-center justify-between mb-1.5">
           <span class="text-xs text-muted">
-            {{ completedCount }}/{{ activeHabits.length }}
+            {{ filteredCompletedCount }}/{{ filteredActiveHabits.length }}
           </span>
-          <span class="text-xs font-semibold text-primary">{{ Math.round(completionRate * 100) }}%</span>
+          <span class="text-xs font-semibold text-primary">{{ Math.round(filteredCompletionRate * 100) }}%</span>
         </div>
-        <UProgress :model-value="completionRate * 100" color="primary" size="md" class="progress-no-anim" />
+        <UProgress :model-value="filteredCompletionRate * 100" color="primary" size="md" class="progress-no-anim" />
       </div>
     </header>
 
@@ -173,7 +229,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         <div :key="currentDateStr" class="absolute inset-0 overflow-y-auto">
           <!-- All done banner (today only) -->
           <Transition name="fade">
-            <div v-if="allDone && isToday" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-primary/10 text-center">
+            <div v-if="filteredAllDone && isToday" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-primary/10 text-center">
               <p class="text-sm font-semibold text-primary">
                 🎉 Todos os hábitos de hoje concluídos!
               </p>
@@ -181,16 +237,16 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           </Transition>
 
           <!-- Future banner -->
-          <div v-if="isFuture && dueHabits.length" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-elevated/60 text-center">
+          <div v-if="isFuture && hasVisibleHabits" class="mx-4 mt-3 mb-1 px-4 py-2.5 rounded-2xl bg-elevated/60 text-center">
             <p class="text-sm text-muted">
-              📅 {{ dueHabits.length }} {{ dueHabits.length === 1 ? 'hábito planejado' : 'hábitos planejados' }} para este dia
+              📅 {{ filteredDueHabits.length }} {{ filteredDueHabits.length === 1 ? 'hábito planejado' : 'hábitos planejados' }} para este dia
             </p>
           </div>
 
           <!-- Habit list -->
-          <div v-if="dueHabits.length" class="px-3 pt-4 pb-4 flex flex-col gap-2">
+          <div v-if="hasVisibleHabits" class="px-3 pt-4 pb-4 flex flex-col gap-2">
             <div
-              v-for="item in dueHabits"
+              v-for="item in filteredDueHabits"
               :key="item.habit.id"
               class="rounded-2xl border transition-colors"
               :class="item.completed || item.skipped
@@ -210,7 +266,17 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 
           <!-- Empty state -->
           <div v-else class="flex flex-col items-center justify-center px-8 py-16 text-center">
-            <template v-if="isToday">
+            <template v-if="hasHabitsForDay">
+              <div class="text-4xl mb-3">🕒</div>
+              <p class="font-medium mb-1">Nada para {{ selectedFilterLabel.toLowerCase() }}</p>
+              <p class="text-sm text-muted mb-6 leading-relaxed">
+                Tente trocar o filtro ou veja todos os hábitos do dia.
+              </p>
+              <UButton variant="soft" color="neutral" @click="selectedPeriod = 'all'">
+                Ver todos
+              </UButton>
+            </template>
+            <template v-else-if="isToday">
               <div class="text-5xl mb-4">📋</div>
               <h2 class="font-bold text-lg mb-1">Nenhum hábito para hoje</h2>
               <p class="text-sm text-muted mb-6 leading-relaxed">
@@ -220,12 +286,12 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
                 Adicionar hábito
               </UButton>
             </template>
-            <template v-else-if="isPast">
+            <template v-else-if="!hasHabitsForDay && isPast">
               <div class="text-4xl mb-3">🗓️</div>
               <p class="font-medium mb-1">Sem hábitos neste dia</p>
               <p class="text-sm text-muted">Nenhum hábito estava ativo nesta data</p>
             </template>
-            <template v-else>
+            <template v-else-if="!hasHabitsForDay">
               <div class="text-4xl mb-3">✨</div>
               <p class="font-medium mb-1">Nenhum hábito planejado</p>
               <p class="text-sm text-muted">Adicione hábitos na aba "Hoje" para vê-los aqui</p>
@@ -275,6 +341,14 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 .progress-no-anim :deep([data-slot="indicator"]) {
   animation: none !important;
   transition: none !important;
+}
+
+.no-scrollbar {
+  scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
 }
 
 /* Slide to next day (swipe left) */

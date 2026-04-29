@@ -1,4 +1,5 @@
 export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
+export type HabitPeriod = 'anytime' | 'morning' | 'afternoon' | 'night'
 
 export type RecurrenceType = 'daily' | 'weekdays' | 'weekends' | 'custom' | 'weekly_x'
 
@@ -13,6 +14,7 @@ export interface Habit {
   name: string
   emoji: string
   color?: string
+  period?: HabitPeriod
   recurrence: HabitRecurrence
   createdAt: string
   archivedAt?: string

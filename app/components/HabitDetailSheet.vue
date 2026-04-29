@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Completion, Habit } from '~/types'
+import { getHabitPeriodLabel } from '~/utils/periods'
 
 const props = defineProps<{
   open: boolean
@@ -131,6 +132,11 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'] // Mon→Sun
             </div>
             <span class="text-sm font-semibold text-default w-8 text-right">{{ thisMonthRate }}%</span>
           </div>
+        </div>
+
+        <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-elevated/50">
+          <span class="text-sm text-muted">Turno prioritário</span>
+          <span class="text-sm font-semibold text-default">{{ getHabitPeriodLabel(habit.period) }}</span>
         </div>
 
         <!-- Heatmap -->

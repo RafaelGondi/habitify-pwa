@@ -1,6 +1,7 @@
 <script setup lang="ts">
-import type { Habit, HabitRecurrence, RecurrenceType, WeekDay } from '~/types'
+import type { Habit, HabitPeriod, HabitRecurrence, RecurrenceType, WeekDay } from '~/types'
 import { DEFAULT_COLOR, HABIT_COLORS } from '~/utils/colors'
+import { PERIOD_OPTIONS } from '~/utils/periods'
 
 const props = defineProps<{
   habit?: Habit
@@ -47,6 +48,7 @@ const DAYS: Array<{ value: WeekDay, label: string }> = [
 const name = ref(props.habit?.name ?? '')
 const emoji = ref(props.habit?.emoji ?? '🎯')
 const color = ref(props.habit?.color ?? DEFAULT_COLOR)
+const period = ref<HabitPeriod>(props.habit?.period ?? 'anytime')
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
 const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
@@ -87,6 +89,7 @@ function handleSubmit() {
     name: name.value.trim(),
     emoji: emoji.value,
     color: color.value,
+    period: period.value,
     recurrence,
     createdAt: new Date(startDate.value + 'T12:00:00').toISOString(),
   })
@@ -142,6 +145,28 @@ function handleSubmit() {
           />
         </button>
       </div>
+    </div>
+
+    <!-- Priority period -->
+    <div>
+      <label class="block text-sm font-medium mb-1.5 text-default">Turno prioritário</label>
+      <div class="grid grid-cols-2 gap-1.5">
+        <button
+          v-for="option in PERIOD_OPTIONS"
+          :key="option.value"
+          type="button"
+          class="h-10 rounded-xl text-sm font-medium transition-colors"
+          :class="period === option.value
+            ? 'bg-primary text-white'
+            : 'bg-elevated text-default hover:bg-accented'"
+          @click="period = option.value"
+        >
+          {{ option.label }}
+        </button>
+      </div>
+      <p class="text-xs text-muted mt-1">
+        Usado para destacar esse hábito no filtro da tela inicial.
+      </p>
     </div>
 
     <!-- Recurrence -->
