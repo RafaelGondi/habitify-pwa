@@ -14,12 +14,17 @@ const emit = defineEmits<{
 const noteValue = ref(props.note ?? '')
 const textareaRef = ref<HTMLTextAreaElement | null>(null)
 
-watch(() => props.open, (isOpen) => {
-  if (isOpen) {
-    noteValue.value = props.note ?? ''
-    nextTick(() => textareaRef.value?.focus())
+watch(
+  () => [props.open, props.habitName, props.note],
+  ([isOpen]) => {
+    if (isOpen) {
+      noteValue.value = props.note ?? ''
+      nextTick(() => textareaRef.value?.focus())
+    }
   }
-})
+)
+
+const hasSavedNote = computed(() => !!props.note?.trim())
 
 function handleSave() {
   emit('save', noteValue.value.trim())
@@ -35,7 +40,7 @@ function handleSave() {
   >
     <div class="flex flex-col gap-4 px-5 pt-1 pb-6">
       <p class="text-sm text-muted">
-        Adicione uma nota sobre como foi realizar este hábito hoje.
+        {{ hasSavedNote ? 'Edite ou revise a nota salva para este hábito hoje.' : 'Adicione uma nota sobre como foi realizar este hábito hoje.' }}
       </p>
 
       <UTextarea
@@ -47,6 +52,10 @@ function handleSave() {
         autofocus
       />
 
+      <p v-if="hasSavedNote && !noteValue" class="text-xs text-muted">
+        Esta nota será removida se você salvar o campo vazio.
+      </p>
+
       <div class="flex gap-3">
         <UButton
           variant="ghost"
@@ -57,7 +66,7 @@ function handleSave() {
           Cancelar
         </UButton>
         <UButton class="flex-1" @click="handleSave">
-          Salvar
+          {{ hasSavedNote ? 'Salvar alterações' : 'Salvar' }}
         </UButton>
       </div>
     </div>

@@ -55,23 +55,23 @@ function openDetail(habit: Habit) {
 }
 
 // Note modal
-const { setNote } = useCompletions()
+const { getCompletion, setNote } = useCompletions()
 const noteModalOpen = ref(false)
 const noteHabit = ref<Habit | null>(null)
-const noteHabitItem = ref<typeof dueHabits.value[0] | null>(null)
 
-function openNoteModal(habit: Habit, item: typeof dueHabits.value[0]) {
+const currentNote = computed(() => {
+  if (!noteHabit.value) return ''
+  return getCompletion(noteHabit.value.id, currentDateStr.value)?.note ?? ''
+})
+
+function openNoteModal(habit: Habit, _item: typeof dueHabits.value[0]) {
   noteHabit.value = habit
-  noteHabitItem.value = item
   noteModalOpen.value = true
 }
 
 function handleSaveNote(note: string) {
   if (noteHabit.value) {
     setNote(noteHabit.value.id, currentDateStr.value, note)
-    if (noteHabitItem.value) {
-      noteHabitItem.value.note = note || undefined
-    }
   }
 }
 
@@ -264,7 +264,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       v-model:open="noteModalOpen"
       :habit-name="noteHabit?.name ?? ''"
       :habit-emoji="noteHabit?.emoji ?? ''"
-      :note="noteHabitItem?.note"
+      :note="currentNote"
       @save="handleSaveNote"
     />
   </div>
