@@ -2,6 +2,7 @@
 import type { Habit } from '~/types'
 import { getHabitPeriodLabel } from '~/utils/periods'
 
+const { user, logout } = useAuth()
 const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
 const showArchived = ref(false)
 const confirmDeleteId = ref<string | null>(null)
@@ -225,6 +226,25 @@ const { $pwa } = useNuxtApp()
             <p class="text-xs text-muted">Adicionar à tela inicial como app</p>
           </div>
         </button>
+      </section>
+
+      <!-- Account section -->
+      <section class="border-t border-default pt-6">
+        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Conta</h2>
+        <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default">
+          <img
+            v-if="user?.photoURL"
+            :src="user.photoURL"
+            class="w-8 h-8 rounded-full shrink-0"
+            referrerpolicy="no-referrer"
+          >
+          <UIcon v-else name="i-lucide-user-circle" class="text-primary text-xl shrink-0" />
+          <div class="flex-1 min-w-0">
+            <p class="font-medium text-sm truncate">{{ user?.displayName ?? user?.email }}</p>
+            <p class="text-xs text-muted truncate">{{ user?.email }}</p>
+          </div>
+          <UButton variant="ghost" color="neutral" size="xs" icon="i-lucide-log-out" @click="logout" />
+        </div>
       </section>
 
       <!-- Data section -->

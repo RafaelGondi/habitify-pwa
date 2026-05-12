@@ -1,7 +1,10 @@
+import { doc, setDoc, deleteDoc } from 'firebase/firestore'
 import type { Habit } from '~/types'
 
 export function useHabits() {
-  const { data, save } = useStorage()
+  const { data } = useStorage()
+  const { db } = useFirebase()
+  const { user } = useAuth()
 
   const activeHabits = computed(() =>
     [...data.value.habits]
@@ -15,6 +18,10 @@ export function useHabits() {
       .sort((a, b) => (b.archivedAt ?? '').localeCompare(a.archivedAt ?? '')),
   )
 
+  function habitRef(id: string) {
+    return doc(db, 'users', user.value!.uid, 'habits', id)
+  }
+
   function addHabit(input: Omit<Habit, 'id' | 'order'> & { createdAt?: string }): Habit {
     const habit: Habit = {
       ...input,
@@ -22,14 +29,18 @@ export function useHabits() {
       createdAt: input.createdAt ?? new Date().toISOString(),
       order: data.value.habits.length,
     }
-    save({ habits: [...data.value.habits, habit] })
+    data.value.habits = [...data.value.habits, habit]
+    if (user.value) setDoc(habitRef(habit.id), toFirestore(habit))
     return habit
   }
 
   function updateHabit(id: string, patch: Partial<Habit>) {
-    save({
-      habits: data.value.habits.map(h => h.id === id ? { ...h, ...patch } : h),
-    })
+    const habits = data.value.habits.map(h => h.id === id ? { ...h, ...patch } : h)
+    data.value.habits = habits
+    if (user.value) {
+      const updated = habits.find(h => h.id === id)!
+      setDoc(habitRef(id), toFirestore(updated))
+    }
   }
 
   function archiveHabit(id: string) {
@@ -41,11 +52,19 @@ export function useHabits() {
   }
 
   function deleteHabit(id: string) {
-    save({
-      habits: data.value.habits.filter(h => h.id !== id),
-      completions: data.value.completions.filter(c => c.habitId !== id),
-      skips: (data.value.skips ?? []).filter(s => s.habitId !== id),
-    })
+    const completionsToDelete = data.value.completions.filter(c => c.habitId === id)
+    const skipsToDelete = (data.value.skips ?? []).filter(s => s.habitId === id)
+
+    data.value.habits = data.value.habits.filter(h => h.id !== id)
+    data.value.completions = data.value.completions.filter(c => c.habitId !== id)
+    data.value.skips = (data.value.skips ?? []).filter(s => s.habitId !== id)
+
+    if (user.value) {
+      const uid = user.value.uid
+      deleteDoc(doc(db, 'users', uid, 'habits', id))
+      completionsToDelete.forEach(c => deleteDoc(doc(db, 'users', uid, 'completions', c.id)))
+      skipsToDelete.forEach(s => deleteDoc(doc(db, 'users', uid, 'skips', s.id)))
+    }
   }
 
   return { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit }
