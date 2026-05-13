@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
 import { getHabitPeriodLabel } from '~/utils/periods'
+import { getHabitColor } from '~/utils/colors'
 
 const { user, logout } = useAuth()
 const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
@@ -86,46 +87,27 @@ const { $pwa } = useNuxtApp()
           <div
             v-for="habit in activeHabits"
             :key="habit.id"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-elevated/40 border border-default"
+            class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
           >
-            <!-- Emoji + info -->
-            <div class="text-2xl w-10 h-10 flex items-center justify-center rounded-xl bg-background shrink-0">
+            <div
+              class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
+              :style="{ backgroundColor: getHabitColor(habit.color).light }"
+            >
               {{ habit.emoji }}
             </div>
             <div class="flex-1 min-w-0">
-              <p class="font-medium text-sm truncate">{{ habit.name }}</p>
+              <p class="font-medium text-base truncate">{{ habit.name }}</p>
               <p class="text-xs text-muted">
                 {{ habit.recurrence.type === 'weekly_x'
                   ? `${habit.recurrence.timesPerWeek}x por semana`
                   : recurrenceLabel(habit.recurrence.type) }}
-              </p>
-              <p class="text-xs text-primary/80 mt-0.5">
-                {{ getHabitPeriodLabel(habit.period) }}
+                <span v-if="habit.period && habit.period !== 'anytime'"> · {{ getHabitPeriodLabel(habit.period) }}</span>
               </p>
             </div>
-            <!-- Actions -->
             <div class="flex gap-1 shrink-0">
-              <UButton
-                icon="i-lucide-pencil"
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                @click="openEdit(habit)"
-              />
-              <UButton
-                icon="i-lucide-archive"
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                @click="handleArchive(habit)"
-              />
-              <UButton
-                icon="i-lucide-trash-2"
-                variant="ghost"
-                color="error"
-                size="xs"
-                @click="confirmDeleteId = habit.id"
-              />
+              <UButton icon="i-lucide-pencil" variant="ghost" color="neutral" size="xs" @click="openEdit(habit)" />
+              <UButton icon="i-lucide-archive" variant="ghost" color="neutral" size="xs" @click="handleArchive(habit)" />
+              <UButton icon="i-lucide-trash-2" variant="ghost" color="error" size="xs" @click="confirmDeleteId = habit.id" />
             </div>
           </div>
         </div>
@@ -167,16 +149,19 @@ const { $pwa } = useNuxtApp()
             <div
               v-for="habit in archivedHabits"
               :key="habit.id"
-              class="flex items-center gap-3 px-4 py-3 rounded-2xl bg-elevated/20 border border-default opacity-60"
+              class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-zinc-200/60 dark:border-zinc-700/40 bg-zinc-50 dark:bg-zinc-800/50 opacity-60"
             >
-              <div class="text-2xl w-10 h-10 flex items-center justify-center rounded-xl bg-background shrink-0">
+              <div
+                class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
+                :style="{ backgroundColor: getHabitColor(habit.color).light }"
+              >
                 {{ habit.emoji }}
               </div>
               <div class="flex-1 min-w-0">
-                <p class="font-medium text-sm truncate">{{ habit.name }}</p>
-                <p class="text-xs text-muted">{{ recurrenceLabel(habit.recurrence.type) }}</p>
-                <p class="text-xs text-primary/80 mt-0.5">
-                  {{ getHabitPeriodLabel(habit.period) }}
+                <p class="font-medium text-base truncate">{{ habit.name }}</p>
+                <p class="text-xs text-muted">
+                  {{ recurrenceLabel(habit.recurrence.type) }}
+                  <span v-if="habit.period && habit.period !== 'anytime'"> · {{ getHabitPeriodLabel(habit.period) }}</span>
                 </p>
               </div>
               <UButton
