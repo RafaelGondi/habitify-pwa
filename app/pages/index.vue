@@ -2,6 +2,8 @@
 import type { Habit, HabitPeriod, HabitWithStatus } from '~/types'
 import { getCurrentPeriod, PERIOD_OPTIONS } from '~/utils/periods'
 
+type PeriodFilter = 'all' | HabitPeriod
+
 const todayStr = toDateString(new Date())
 
 // Current date being viewed
@@ -40,21 +42,19 @@ function onTouchEnd(e: TouchEvent) {
 // Day data
 const { dueHabits, isToday, isPast, isFuture, toggleHabit, toggleSkip } = useDayHabits(currentDateStr)
 
-const selectedPeriod = ref<'all' | Exclude<HabitPeriod, 'anytime'>>(getCurrentPeriod())
+const selectedPeriod = ref<PeriodFilter>(getCurrentPeriod())
 const currentPeriod = computed(() => getCurrentPeriod())
 const periodFilters = computed(() => [
   { value: 'all' as const, label: 'Todos' },
-  ...PERIOD_OPTIONS
-    .filter(option => option.value !== 'anytime')
-    .map(option => ({ value: option.value, label: option.label })),
+  ...PERIOD_OPTIONS.map(option => ({ value: option.value, label: option.label })),
 ])
 
 const filteredDueHabits = computed((): HabitWithStatus[] => {
   if (selectedPeriod.value === 'all') return dueHabits.value
 
   return dueHabits.value.filter((item) => {
-    const period = item.habit.period ?? 'anytime'
-    return period === 'anytime' || period === selectedPeriod.value
+    const { periods } = item.habit
+    return !periods || periods.length === 0 || periods.includes(selectedPeriod.value as HabitPeriod)
   })
 })
 

@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { Habit } from '~/types'
-import { getHabitPeriodLabel } from '~/utils/periods'
+import { getHabitPeriodsLabel } from '~/utils/periods'
 import { getHabitColor } from '~/utils/colors'
 
 const { user, logout } = useAuth()
@@ -101,7 +101,7 @@ const { $pwa } = useNuxtApp()
                 {{ habit.recurrence.type === 'weekly_x'
                   ? `${habit.recurrence.timesPerWeek}x por semana`
                   : recurrenceLabel(habit.recurrence.type) }}
-                <span v-if="habit.period && habit.period !== 'anytime'"> · {{ getHabitPeriodLabel(habit.period) }}</span>
+                <span v-if="habit.periods && habit.periods.length"> · {{ getHabitPeriodsLabel(habit.periods) }}</span>
               </p>
             </div>
             <div class="flex gap-1 shrink-0">
@@ -161,7 +161,7 @@ const { $pwa } = useNuxtApp()
                 <p class="font-medium text-base truncate">{{ habit.name }}</p>
                 <p class="text-xs text-muted">
                   {{ recurrenceLabel(habit.recurrence.type) }}
-                  <span v-if="habit.period && habit.period !== 'anytime'"> · {{ getHabitPeriodLabel(habit.period) }}</span>
+                  <span v-if="habit.periods && habit.periods.length"> · {{ getHabitPeriodsLabel(habit.periods) }}</span>
                 </p>
               </div>
               <UButton

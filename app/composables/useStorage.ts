@@ -1,4 +1,4 @@
-import type { AppData, Habit, Completion, Skip } from '~/types'
+import type { AppData, Habit, Completion, Skip, HabitPeriod } from '~/types'
 import { collection, getDocs, setDoc, doc } from 'firebase/firestore'
 
 const LEGACY_KEY = 'habitify-data'
@@ -40,13 +40,21 @@ export function useStorage() {
 
     data.value = {
       version: 1,
-      habits: habitsSnap.docs.map(d => d.data() as Habit),
+      habits: habitsSnap.docs.map(d => migrateHabit(d.data() as Habit & { period?: string })),
       completions: completionsSnap.docs.map(d => d.data() as Completion),
       skips: skipsSnap.docs.map(d => d.data() as Skip),
     }
   }
 
   return { data, loadUserData }
+}
+
+function migrateHabit(raw: Habit & { period?: string }): Habit {
+  const { period, ...rest } = raw
+  if (period && period !== 'anytime' && !rest.periods) {
+    rest.periods = [period as HabitPeriod]
+  }
+  return rest as Habit
 }
 
 export function toFirestore(obj: object): Record<string, unknown> {

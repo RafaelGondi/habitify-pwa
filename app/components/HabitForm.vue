@@ -3,6 +3,15 @@ import type { Habit, HabitPeriod, HabitRecurrence, RecurrenceType, WeekDay } fro
 import { DEFAULT_COLOR, HABIT_COLORS } from '~/utils/colors'
 import { PERIOD_OPTIONS } from '~/utils/periods'
 
+function togglePeriod(value: HabitPeriod) {
+  if (periods.value.includes(value)) {
+    periods.value = periods.value.filter(p => p !== value)
+  }
+  else {
+    periods.value = [...periods.value, value]
+  }
+}
+
 const props = defineProps<{
   habit?: Habit
 }>()
@@ -48,7 +57,7 @@ const DAYS: Array<{ value: WeekDay, label: string }> = [
 const name = ref(props.habit?.name ?? '')
 const emoji = ref(props.habit?.emoji ?? '🎯')
 const color = ref(props.habit?.color ?? DEFAULT_COLOR)
-const period = ref<HabitPeriod>(props.habit?.period ?? 'anytime')
+const periods = ref<HabitPeriod[]>(props.habit?.periods ?? [])
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
 const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
@@ -89,7 +98,7 @@ function handleSubmit() {
     name: name.value.trim(),
     emoji: emoji.value,
     color: color.value,
-    period: period.value,
+    periods: periods.value.length ? periods.value : undefined,
     recurrence,
     createdAt: new Date(startDate.value + 'T12:00:00').toISOString(),
   })
@@ -156,16 +165,16 @@ function handleSubmit() {
           :key="option.value"
           type="button"
           class="h-10 rounded-xl text-sm font-medium transition-colors"
-          :class="period === option.value
+          :class="periods.includes(option.value)
             ? 'bg-primary text-white'
             : 'bg-elevated text-default hover:bg-accented'"
-          @click="period = option.value"
+          @click="togglePeriod(option.value)"
         >
           {{ option.label }}
         </button>
       </div>
       <p class="text-xs text-muted mt-1">
-        Usado para destacar esse hábito no filtro da tela inicial.
+        Sem seleção = qualquer horário. Pode selecionar mais de um turno.
       </p>
     </div>
 
