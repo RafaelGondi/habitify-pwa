@@ -22,6 +22,23 @@ const streak = computed(() => getStreak(props.item.habit))
 
 const habitColor = computed(() => getHabitColor(props.item.habit.color))
 
+const weeklyProgress = computed(() => props.item.weeklyProgress)
+
+const weeklyBadgeLabel = computed(() => {
+  const progress = weeklyProgress.value
+  if (!progress) return ''
+  const suffix = progress.done > progress.total ? '+' : ''
+  return `${progress.done}/${progress.total}${suffix} sem.`
+})
+
+const weeklyBadgeClass = computed(() => {
+  const progress = weeklyProgress.value
+  if (!progress) return 'bg-elevated text-muted'
+  if (progress.done > progress.total) return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
+  if (progress.done >= progress.total) return 'bg-primary/15 text-primary'
+  return 'bg-elevated text-muted'
+})
+
 function handleToggle() {
   if (!props.item.completed && 'vibrate' in navigator) {
     const result = navigator.vibrate([100, 30, 80])
@@ -66,23 +83,19 @@ function handleToggle() {
           <span>{{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
         </span>
         <span
-          v-if="item.weeklyProgress"
+          v-if="weeklyProgress"
           class="text-xs font-medium px-1.5 py-0.5 rounded-full"
-          :class="item.weeklyProgress.done >= item.weeklyProgress.total
-            ? 'bg-primary/15 text-primary'
-            : 'bg-elevated text-muted'"
+          :class="weeklyBadgeClass"
         >
-          {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} sem.
+          {{ weeklyBadgeLabel }}
         </span>
       </div>
       <span
-        v-else-if="item.weeklyProgress && mode !== 'future'"
+        v-else-if="weeklyProgress && mode !== 'future'"
         class="text-xs font-medium px-1.5 py-0.5 rounded-full mt-0.5 inline-block"
-        :class="item.weeklyProgress.done >= item.weeklyProgress.total
-          ? 'bg-primary/15 text-primary'
-          : 'bg-elevated text-muted'"
+        :class="weeklyBadgeClass"
       >
-        {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} sem.
+        {{ weeklyBadgeLabel }}
       </span>
     </div>
 

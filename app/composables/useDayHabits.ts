@@ -54,7 +54,7 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
           const allowSkip = !completedToday && !skipped && canSkipWeeklyX(dateStr.value, done, total)
           return {
             habit: h,
-            completed: completedToday || done >= total,
+            completed: completedToday,
             completionId: completion?.id,
             note: completion?.note,
             weeklyProgress: { done, total },
@@ -82,7 +82,7 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
 
   // Skipped habits are excluded from completion rate
   const activeHabits = computed(() => dueHabits.value.filter(h => !h.skipped))
-  const completedCount = computed(() => activeHabits.value.filter(h => h.completed).length)
+  const completedCount = computed(() => activeHabits.value.filter(h => isHabitGoalMet(h)).length)
 
   const completionRate = computed(() => {
     if (!activeHabits.value.length || isFuture.value) return 0
@@ -90,18 +90,11 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
   })
 
   const allDone = computed(
-    () => !isFuture.value && activeHabits.value.length > 0 && activeHabits.value.every(h => h.completed),
+    () => !isFuture.value && activeHabits.value.length > 0 && activeHabits.value.every(h => isHabitGoalMet(h)),
   )
 
   function toggleHabit(habitId: string) {
     if (!isEditable.value) return
-    const item = dueHabits.value.find(h => h.habit.id === habitId)
-    if (!item) return
-    if (item.habit.recurrence.type === 'weekly_x' && item.weeklyProgress) {
-      const { done, total } = item.weeklyProgress
-      const completedToday = !!item.completionId
-      if (!completedToday && done >= total) return
-    }
     toggle(habitId, dateStr.value)
   }
 

@@ -58,7 +58,7 @@ export function useHistoryDays() {
 
           return {
             habit: h,
-            completed: completedToday || weekDoneTotal >= total,
+            completed: completedToday,
             completionId: completions.find(c => c.habitId === h.id)?.id,
             weeklyProgress: { done: weekDoneTotal, total },
             skipped,
@@ -78,7 +78,7 @@ export function useHistoryDays() {
       // Exclude skipped from rate (same rule as today view)
       const activeHabits = habits.filter(h => !h.skipped)
       const completionRate = activeHabits.length
-        ? activeHabits.filter(h => h.completed).length / activeHabits.length
+        ? activeHabits.filter(h => isHabitGoalMet(h)).length / activeHabits.length
         : 0
 
       result.push({ date: dateStr, habits, completionRate })

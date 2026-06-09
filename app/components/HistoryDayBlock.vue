@@ -8,7 +8,7 @@ const props = defineProps<{
 
 const isExpanded = ref(props.defaultExpanded ?? false)
 const activeHabits = computed(() => props.day.habits.filter(h => !h.skipped))
-const completedCount = computed(() => activeHabits.value.filter(h => h.completed).length)
+const completedCount = computed(() => activeHabits.value.filter(h => isHabitGoalMet(h)).length)
 const pct = computed(() => Math.round(props.day.completionRate * 100))
 </script>
 

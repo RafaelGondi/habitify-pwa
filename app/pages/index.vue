@@ -59,13 +59,13 @@ const filteredDueHabits = computed((): HabitWithStatus[] => {
 })
 
 const filteredActiveHabits = computed(() => filteredDueHabits.value.filter(h => !h.skipped))
-const filteredCompletedCount = computed(() => filteredActiveHabits.value.filter(h => h.completed).length)
+const filteredCompletedCount = computed(() => filteredActiveHabits.value.filter(h => isHabitGoalMet(h)).length)
 const filteredCompletionRate = computed(() => {
   if (!filteredActiveHabits.value.length || isFuture.value) return 0
   return filteredCompletedCount.value / filteredActiveHabits.value.length
 })
 const filteredAllDone = computed(
-  () => !isFuture.value && filteredActiveHabits.value.length > 0 && filteredActiveHabits.value.every(h => h.completed)
+  () => !isFuture.value && filteredActiveHabits.value.length > 0 && filteredActiveHabits.value.every(h => isHabitGoalMet(h))
 )
 const hasVisibleHabits = computed(() => filteredDueHabits.value.length > 0)
 const hasHabitsForDay = computed(() => dueHabits.value.length > 0)
