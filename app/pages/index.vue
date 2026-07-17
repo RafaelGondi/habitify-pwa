@@ -221,6 +221,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         <div
           :key="currentDateStr"
           class="app-scroll page-body page-body--flush-top"
+          :class="{ 'page-body--with-fab': isToday }"
         >
           <Transition name="fade">
             <div

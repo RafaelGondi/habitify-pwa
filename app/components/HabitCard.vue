@@ -138,7 +138,7 @@ function handleToggle(e: Event) {
           <AppIcon
             v-if="item.completed"
             name="lucide:check"
-            :size="14"
+            :size="11"
           />
         </button>
       </div>
@@ -150,7 +150,7 @@ function handleToggle(e: Event) {
       >
         <AppIcon
           :name="item.completed ? 'lucide:check' : 'lucide:x'"
-          :size="14"
+          :size="11"
         />
       </div>
 

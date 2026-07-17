@@ -9,6 +9,7 @@
   margin: 0 auto;
   overflow: hidden;
   background: var(--bg);
+  --fab-height: 3.25rem;
 }
 
 .app-main {
@@ -36,6 +37,16 @@
     var(--space-5)
     var(--page-pad-x)
     calc(var(--nav-height) + var(--safe-bottom) + var(--space-6));
+}
+
+.page-body--with-fab {
+  padding-bottom: calc(
+    var(--nav-height)
+    + var(--safe-bottom)
+    + var(--space-3)
+    + var(--fab-height)
+    + var(--space-5)
+  );
 }
 
 .page-body--flush-top {
@@ -189,8 +200,9 @@
 }
 
 .check-toggle {
-  width: 2.5rem;
-  height: 2.5rem;
+  width: 1.375rem;
+  height: 1.375rem;
+  box-sizing: content-box;
   border-radius: var(--radius-full);
   border: 1.5px solid var(--control-border);
   display: grid;
@@ -202,6 +214,11 @@
     background-color var(--transition),
     border-color var(--transition),
     transform var(--transition);
+}
+
+button.check-toggle {
+  padding: 11px;
+  margin: -11px;
 }
 
 .check-toggle--on {
