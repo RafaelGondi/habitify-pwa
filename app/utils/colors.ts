@@ -2,24 +2,24 @@ export interface HabitColor {
   id: string
   label: string
   hex: string
-  light: string // bg tint for emoji container
+  light: string
 }
 
 export const HABIT_COLORS: HabitColor[] = [
-  { id: 'teal',   label: 'Teal',   hex: '#14b8a6', light: '#ccfbf1' },
-  { id: 'blue',   label: 'Azul',   hex: '#3b82f6', light: '#dbeafe' },
-  { id: 'indigo', label: 'Índigo', hex: '#6366f1', light: '#e0e7ff' },
-  { id: 'purple', label: 'Roxo',   hex: '#a855f7', light: '#f3e8ff' },
-  { id: 'pink',   label: 'Rosa',   hex: '#ec4899', light: '#fce7f3' },
-  { id: 'red',    label: 'Vermelho', hex: '#ef4444', light: '#fee2e2' },
-  { id: 'orange', label: 'Laranja', hex: '#f97316', light: '#ffedd5' },
-  { id: 'yellow', label: 'Amarelo', hex: '#eab308', light: '#fef9c3' },
-  { id: 'green',  label: 'Verde',  hex: '#22c55e', light: '#dcfce7' },
-  { id: 'cyan',   label: 'Ciano',  hex: '#06b6d4', light: '#cffafe' },
-  { id: 'slate',  label: 'Cinza',  hex: '#64748b', light: '#f1f5f9' },
-  { id: 'gray',   label: 'Cinza Claro', hex: '#94a3b8', light: '#f8fafc' },
-  { id: 'white',  label: 'Branco', hex: '#e2e8f0', light: '#ffffff' },
-  { id: 'rose',   label: 'Rosé',   hex: '#f43f5e', light: '#ffe4e6' },
+  { id: 'teal', label: 'Botânico', hex: 'var(--cat-4)', light: 'color-mix(in srgb, var(--cat-4) 16%, var(--bg))' },
+  { id: 'blue', label: 'Azul mineral', hex: 'var(--cat-1)', light: 'color-mix(in srgb, var(--cat-1) 16%, var(--bg))' },
+  { id: 'indigo', label: 'Índigo', hex: 'var(--cat-2)', light: 'color-mix(in srgb, var(--cat-2) 16%, var(--bg))' },
+  { id: 'purple', label: 'Violeta', hex: 'var(--cat-2)', light: 'color-mix(in srgb, var(--cat-2) 16%, var(--bg))' },
+  { id: 'pink', label: 'Rosé', hex: 'var(--cat-5)', light: 'color-mix(in srgb, var(--cat-5) 16%, var(--bg))' },
+  { id: 'red', label: 'Terracota', hex: 'var(--cat-5)', light: 'color-mix(in srgb, var(--cat-5) 16%, var(--bg))' },
+  { id: 'orange', label: 'Âmbar', hex: 'var(--cat-3)', light: 'color-mix(in srgb, var(--cat-3) 16%, var(--bg))' },
+  { id: 'yellow', label: 'Dourado', hex: 'var(--cat-3)', light: 'color-mix(in srgb, var(--cat-3) 16%, var(--bg))' },
+  { id: 'green', label: 'Verde', hex: 'var(--cat-4)', light: 'color-mix(in srgb, var(--cat-4) 16%, var(--bg))' },
+  { id: 'cyan', label: 'Azul claro', hex: 'var(--cat-1)', light: 'color-mix(in srgb, var(--cat-1) 16%, var(--bg))' },
+  { id: 'slate', label: 'Ardósia', hex: 'var(--cat-6)', light: 'color-mix(in srgb, var(--cat-6) 16%, var(--bg))' },
+  { id: 'gray', label: 'Pedra', hex: 'var(--cat-6)', light: 'color-mix(in srgb, var(--cat-6) 12%, var(--bg))' },
+  { id: 'white', label: 'Neutro', hex: 'var(--border-strong)', light: 'var(--bg-soft)' },
+  { id: 'rose', label: 'Rosa antigo', hex: 'var(--cat-5)', light: 'color-mix(in srgb, var(--cat-5) 16%, var(--bg))' }
 ]
 
 export const DEFAULT_COLOR = 'teal'

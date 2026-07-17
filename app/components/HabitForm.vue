@@ -106,28 +106,23 @@ function handleSubmit() {
 </script>
 
 <template>
-  <form class="flex flex-col gap-5 p-4" @submit.prevent="handleSubmit">
-    <!-- Name -->
-    <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Nome do hábito</label>
-      <UInput
-        v-model="name"
-        placeholder="Ex: Beber 2L de água"
-        size="lg"
-        autofocus
-      />
-    </div>
+  <form class="form-stack" @submit.prevent="handleSubmit">
+    <AkInput
+      v-model="name"
+      label="Nome do hábito"
+      placeholder="Ex: Beber 2L de água"
+      size="lg"
+    />
 
-    <!-- Emoji picker -->
     <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Ícone</label>
-      <div class="grid grid-cols-8 gap-1 max-h-36 overflow-y-auto rounded-xl border border-default bg-background p-2">
+      <p class="text-sm font-semibold" style="margin-bottom: 7px">Ícone</p>
+      <div class="emoji-grid">
         <button
           v-for="e in EMOJIS"
           :key="e"
           type="button"
-          class="h-9 w-9 rounded-lg flex items-center justify-center text-xl transition-colors"
-          :class="emoji === e ? 'bg-primary/20 ring-2 ring-primary' : 'hover:bg-elevated'"
+          class="emoji-cell tap-scale"
+          :class="{ 'emoji-cell--active': emoji === e }"
           @click="emoji = e"
         >
           {{ e }}
@@ -135,168 +130,121 @@ function handleSubmit() {
       </div>
     </div>
 
-    <!-- Color picker -->
     <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Cor</label>
-      <div class="flex gap-2 flex-wrap">
+      <p class="text-sm font-semibold" style="margin-bottom: 7px">Cor</p>
+      <div class="color-row">
         <button
           v-for="c in HABIT_COLORS"
           :key="c.id"
           type="button"
-          class="w-8 h-8 rounded-full transition-transform active:scale-90 relative"
+          class="color-swatch tap-scale"
+          :class="{ 'color-swatch--active': color === c.id }"
           :style="{ backgroundColor: c.hex }"
+          :aria-label="c.label"
           @click="color = c.id"
-        >
-          <span
-            v-if="color === c.id"
-            class="absolute inset-0 rounded-full ring-2 ring-offset-2 ring-offset-background"
-            :style="{ boxShadow: `0 0 0 2px white, 0 0 0 4px ${c.hex}` }"
-          />
-        </button>
+        />
       </div>
     </div>
 
-    <!-- Priority period -->
     <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Turno prioritário</label>
-      <div class="grid grid-cols-2 gap-1.5">
-        <button
+      <p class="text-sm font-semibold" style="margin-bottom: 7px">Turno prioritário</p>
+      <div class="toggle-grid">
+        <AkChip
           v-for="option in PERIOD_OPTIONS"
           :key="option.value"
-          type="button"
-          class="h-10 rounded-xl text-sm font-medium transition-colors"
-          :class="periods.includes(option.value)
-            ? 'bg-primary text-white'
-            : 'bg-elevated text-default hover:bg-accented'"
+          :active="periods.includes(option.value)"
           @click="togglePeriod(option.value)"
         >
           {{ option.label }}
-        </button>
+        </AkChip>
       </div>
-      <p class="text-xs text-muted mt-1">
+      <p class="text-xs text-muted" style="margin-top: var(--space-2)">
         Sem seleção = qualquer horário. Pode selecionar mais de um turno.
       </p>
     </div>
 
-    <!-- Recurrence -->
     <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Recorrência</label>
-      <div class="grid grid-cols-2 gap-1.5">
-        <button
+      <p class="text-sm font-semibold" style="margin-bottom: 7px">Recorrência</p>
+      <div class="toggle-grid">
+        <AkChip
           v-for="opt in RECURRENCE_OPTIONS"
           :key="opt.value"
-          type="button"
-          class="h-10 rounded-xl text-sm font-medium transition-colors"
-          :class="recurrenceType === opt.value
-            ? 'bg-primary text-white'
-            : 'bg-elevated text-default hover:bg-accented'"
+          :active="recurrenceType === opt.value"
           @click="recurrenceType = opt.value"
         >
           {{ opt.label }}
-        </button>
+        </AkChip>
       </div>
     </div>
 
-    <!-- Times per week picker -->
-    <Transition
-      enter-active-class="transition-all duration-200"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-150"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
+    <Transition name="fade">
       <div v-if="recurrenceType === 'weekly_x'">
-        <label class="block text-sm font-medium mb-1.5 text-default">Quantas vezes por semana?</label>
-        <div class="flex items-center gap-3">
-          <button
+        <p class="text-sm font-semibold" style="margin-bottom: 7px">Quantas vezes por semana?</p>
+        <div class="counter-row">
+          <AkButton
             type="button"
-            class="w-10 h-10 rounded-xl bg-elevated text-lg font-bold flex items-center justify-center hover:bg-accented transition-colors disabled:opacity-30"
+            variant="secondary"
+            size="sm"
             :disabled="timesPerWeek <= 1"
             @click="timesPerWeek = Math.max(1, timesPerWeek - 1)"
           >
             −
-          </button>
-          <div class="flex-1 text-center">
-            <span class="text-3xl font-bold text-primary">{{ timesPerWeek }}</span>
-            <span class="text-sm text-muted ml-1">{{ timesPerWeek === 1 ? 'vez' : 'vezes' }}</span>
+          </AkButton>
+          <div class="counter-value">
+            {{ timesPerWeek }}
+            <span class="text-sm text-muted">{{ timesPerWeek === 1 ? 'vez' : 'vezes' }}</span>
           </div>
-          <button
+          <AkButton
             type="button"
-            class="w-10 h-10 rounded-xl bg-elevated text-lg font-bold flex items-center justify-center hover:bg-accented transition-colors disabled:opacity-30"
+            variant="secondary"
+            size="sm"
             :disabled="timesPerWeek >= 7"
             @click="timesPerWeek = Math.min(7, timesPerWeek + 1)"
           >
             +
-          </button>
+          </AkButton>
         </div>
       </div>
     </Transition>
 
-    <!-- Custom days -->
-    <Transition
-      enter-active-class="transition-all duration-200"
-      enter-from-class="opacity-0 -translate-y-2"
-      enter-to-class="opacity-100 translate-y-0"
-      leave-active-class="transition-all duration-150"
-      leave-from-class="opacity-100 translate-y-0"
-      leave-to-class="opacity-0 -translate-y-2"
-    >
+    <Transition name="fade">
       <div v-if="recurrenceType === 'custom'">
-        <label class="block text-sm font-medium mb-1.5 text-default">Dias da semana</label>
-        <div class="flex gap-1">
-          <button
+        <p class="text-sm font-semibold" style="margin-bottom: 7px">Dias da semana</p>
+        <div class="toggle-grid toggle-grid--days">
+          <AkChip
             v-for="day in DAYS"
             :key="day.value"
-            type="button"
-            class="flex-1 h-9 rounded-xl text-xs font-semibold transition-colors"
-            :class="customDays.includes(day.value)
-              ? 'bg-primary text-white'
-              : 'bg-elevated text-muted hover:bg-accented'"
+            :active="customDays.includes(day.value)"
             @click="toggleDay(day.value)"
           >
             {{ day.label }}
-          </button>
+          </AkChip>
         </div>
       </div>
     </Transition>
 
-    <!-- Start date -->
     <div>
-      <label class="block text-sm font-medium mb-1.5 text-default">Início do hábito</label>
+      <p class="text-sm font-semibold" style="margin-bottom: 7px">Início do hábito</p>
       <input
         v-model="startDate"
         type="date"
+        class="field-date"
         :max="toDateString(new Date())"
-        class="w-full h-10 px-3 rounded-xl border border-default bg-background text-default text-sm focus:outline-none focus:ring-2 focus:ring-primary/50"
       >
-      <p class="text-xs text-muted mt-1">
+      <p class="text-xs text-muted" style="margin-top: var(--space-2)">
         Defina uma data passada para registrar hábitos retroativamente
       </p>
     </div>
 
-    <!-- Error -->
-    <p v-if="error" class="text-sm text-red-500 -mt-2">
-      {{ error }}
-    </p>
+    <p v-if="error" class="text-sm text-danger">{{ error }}</p>
 
-    <!-- Actions -->
-    <div class="flex gap-3 pt-1">
-      <UButton
-        type="button"
-        variant="ghost"
-        color="neutral"
-        class="flex-1"
-        @click="$emit('cancel')"
-      >
+    <div class="form-actions">
+      <AkButton type="button" variant="ghost" block @click="$emit('cancel')">
         Cancelar
-      </UButton>
-      <UButton
-        type="submit"
-        class="flex-1"
-      >
+      </AkButton>
+      <AkButton type="submit" block>
         {{ habit ? 'Salvar' : 'Criar hábito' }}
-      </UButton>
+      </AkButton>
     </div>
   </form>
 </template>

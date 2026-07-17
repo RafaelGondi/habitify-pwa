@@ -2,7 +2,6 @@
 export default defineNuxtConfig({
   modules: [
     '@nuxt/eslint',
-    '@nuxt/ui',
     '@vite-pwa/nuxt',
   ],
 
@@ -31,8 +30,8 @@ export default defineNuxtConfig({
       name: 'Habitify',
       short_name: 'Habitify',
       description: 'Acompanhe seus hábitos diários',
-      theme_color: '#0d9488',
-      background_color: '#09090b',
+      theme_color: '#f8f6f1',
+      background_color: '#f8f6f1',
       display: 'standalone',
       orientation: 'portrait',
       start_url: '/',

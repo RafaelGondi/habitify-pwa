@@ -1,5 +1,5 @@
 <script setup lang="ts">
-const props = defineProps<{
+defineProps<{
   open: boolean
   title?: string
 }>()
@@ -10,70 +10,70 @@ function close() {
   emit('update:open', false)
 }
 
-// Swipe down to close
 let startY = 0
 let isDragging = false
 
 function onHandleTouchStart(e: TouchEvent) {
-  startY = e.touches[0].clientY
+  const touch = e.touches[0]
+  if (!touch) return
+  startY = touch.clientY
   isDragging = true
 }
 
 function onHandleTouchEnd(e: TouchEvent) {
   if (!isDragging) return
   isDragging = false
-  const dy = e.changedTouches[0].clientY - startY
+  const touch = e.changedTouches[0]
+  if (!touch) return
+  const dy = touch.clientY - startY
   if (dy > 60) close()
 }
 </script>
 
 <template>
   <Teleport to="body">
-    <!-- Backdrop -->
     <Transition name="bs-backdrop">
       <div
         v-if="open"
-        class="fixed inset-0 z-40 bg-black/50"
+        class="sheet-backdrop"
         @click="close"
       />
     </Transition>
 
-    <!-- Sheet -->
     <Transition name="bs-slide">
       <div
         v-if="open"
-        class="fixed bottom-0 z-50 w-full rounded-t-3xl flex flex-col shadow-2xl"
-        style="
-          background-color: var(--ui-bg);
-          max-width: 480px;
-          left: 50%;
-          transform: translateX(-50%);
-          max-height: 92dvh;
-          padding-bottom: env(safe-area-inset-bottom, 0px);
-        "
+        class="bottom-sheet"
       >
-        <!-- Drag handle -->
         <div
-          class="flex justify-center pt-3 pb-2 shrink-0 cursor-grab active:cursor-grabbing"
+          class="bottom-sheet__handle-wrap"
           @touchstart="onHandleTouchStart"
           @touchend="onHandleTouchEnd"
         >
-          <div class="w-10 h-1 rounded-full bg-muted/40" />
+          <div class="bottom-sheet__handle" />
         </div>
 
-        <!-- Header -->
-        <div v-if="title" class="flex items-center justify-between px-5 pb-3 shrink-0">
-          <h2 class="font-bold text-lg truncate pr-4">{{ title }}</h2>
-          <button
-            class="w-8 h-8 rounded-full bg-elevated flex items-center justify-center text-muted hover:text-default transition-colors shrink-0"
+        <div
+          v-if="title"
+          class="bottom-sheet__header"
+        >
+          <h2 class="bottom-sheet__title">
+            {{ title }}
+          </h2>
+          <AkIconButton
+            variant="secondary"
+            size="sm"
+            label="Fechar"
             @click="close"
           >
-            <UIcon name="i-lucide-x" class="text-sm" />
-          </button>
+            <AppIcon
+              name="lucide:x"
+              :size="16"
+            />
+          </AkIconButton>
         </div>
 
-        <!-- Content -->
-        <div class="overflow-y-auto flex-1">
+        <div class="bottom-sheet__body">
           <slot />
         </div>
       </div>
@@ -82,10 +82,74 @@ function onHandleTouchEnd(e: TouchEvent) {
 </template>
 
 <style scoped>
+.sheet-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 45%);
+}
+
+.bottom-sheet {
+  position: fixed;
+  bottom: 0;
+  z-index: 50;
+  width: 100%;
+  max-width: var(--shell-max);
+  left: 50%;
+  transform: translateX(-50%);
+  max-height: 92dvh;
+  padding-bottom: var(--safe-bottom);
+  display: flex;
+  flex-direction: column;
+  border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+  background: var(--bg-elevated);
+  box-shadow: var(--shadow-md);
+}
+
+.bottom-sheet__handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-3) 0 var(--space-2);
+  flex-shrink: 0;
+  cursor: grab;
+}
+
+.bottom-sheet__handle {
+  width: 2.5rem;
+  height: 4px;
+  border-radius: var(--radius-full);
+  background: var(--text-tertiary);
+  opacity: 0.45;
+}
+
+.bottom-sheet__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 var(--space-5) var(--space-3);
+  flex-shrink: 0;
+}
+
+.bottom-sheet__title {
+  font-size: 1.125rem;
+  font-weight: 650;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.bottom-sheet__body {
+  overflow-y: auto;
+  flex: 1;
+}
+
 .bs-backdrop-enter-active,
 .bs-backdrop-leave-active {
   transition: opacity 0.25s ease;
 }
+
 .bs-backdrop-enter-from,
 .bs-backdrop-leave-to {
   opacity: 0;
@@ -93,8 +157,9 @@ function onHandleTouchEnd(e: TouchEvent) {
 
 .bs-slide-enter-active,
 .bs-slide-leave-active {
-  transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1);
+  transition: transform 0.32s var(--ease-out-expo);
 }
+
 .bs-slide-enter-from,
 .bs-slide-leave-to {
   transform: translateX(-50%) translateY(100%);

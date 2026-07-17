@@ -4,8 +4,8 @@ import { getHabitColor } from '~/utils/colors'
 
 const props = defineProps<{
   item: HabitWithStatus
-  // editable: interactive check (today + past), past: read-only ✓/✗, future: dashed dot
   mode?: 'editable' | 'past' | 'future'
+  divider?: boolean
 }>()
 
 const emit = defineEmits<{
@@ -19,147 +19,174 @@ const isEditable = computed(() => !props.mode || props.mode === 'editable')
 
 const { getStreak } = useStreak()
 const streak = computed(() => getStreak(props.item.habit))
-
 const habitColor = computed(() => getHabitColor(props.item.habit.color))
-
 const weeklyProgress = computed(() => props.item.weeklyProgress)
 
+const weeklyBadgeVariant = computed(() => {
+  const p = weeklyProgress.value
+  if (!p) return 'neutral' as const
+  if (p.done > p.total) return 'success' as const
+  if (p.done >= p.total) return 'accent' as const
+  return 'neutral' as const
+})
+
 const weeklyBadgeLabel = computed(() => {
-  const progress = weeklyProgress.value
-  if (!progress) return ''
-  const suffix = progress.done > progress.total ? '+' : ''
-  return `${progress.done}/${progress.total}${suffix} sem.`
+  const p = weeklyProgress.value
+  if (!p) return ''
+  const suffix = p.done > p.total ? '+' : ''
+  return `${p.done}/${p.total}${suffix} sem.`
 })
 
-const weeklyBadgeClass = computed(() => {
-  const progress = weeklyProgress.value
-  if (!progress) return 'bg-elevated text-muted'
-  if (progress.done > progress.total) return 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400'
-  if (progress.done >= progress.total) return 'bg-primary/15 text-primary'
-  return 'bg-elevated text-muted'
-})
+const isDimmed = computed(() => props.item.skipped)
 
-function handleToggle() {
+function handleToggle(e: Event) {
+  e.stopPropagation()
   if (!props.item.completed && 'vibrate' in navigator) {
-    const result = navigator.vibrate([100, 30, 80])
-    console.log('[haptic] vibrate result:', result)
+    navigator.vibrate([100, 30, 80])
   }
   emit('toggle')
 }
 </script>
 
 <template>
-  <div
-    class="flex items-center gap-3 px-4 py-3 rounded-xl"
-    :class="[
-      item.completed && mode !== 'future' ? 'opacity-55' : '',
-      item.skipped ? 'opacity-40' : '',
-    ]"
+  <AkListRow
+    padding="md"
+    :divider="divider"
+    :class="{ 'habit-row--dimmed': isDimmed }"
   >
-    <!-- Emoji + Name (tappable for detail) -->
-    <button class="flex items-center gap-3 flex-1 min-w-0 text-left" @click="$emit('detail')">
-    <div
-      class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
-      :style="{ backgroundColor: mode === 'future' ? undefined : habitColor.light }"
-      :class="mode === 'future' ? 'bg-elevated/50' : ''"
-    >
-      {{ item.habit.emoji }}
-    </div>
+    <template #leading>
+      <div
+        class="habit-emoji"
+        :class="{ 'habit-emoji--future': mode === 'future' }"
+        :style="mode !== 'future' ? { backgroundColor: habitColor.light } : undefined"
+      >
+        {{ item.habit.emoji }}
+      </div>
+    </template>
 
-    <!-- Name + streak -->
-    <div class="flex-1 min-w-0">
-      <p
-        class="font-medium text-base truncate"
-        :class="[
-          item.completed && mode !== 'future' ? 'line-through text-muted' : 'text-default',
-          mode === 'future' ? 'text-muted' : '',
-        ]"
+    <button
+      class="habit-row__main"
+      type="button"
+      :disabled="mode === 'future'"
+      @click="emit('detail')"
+    >
+      <span
+        class="habit-row-name"
+        :class="{
+          'habit-row-name--done': item.completed && mode !== 'future',
+          'text-muted': mode === 'future'
+        }"
       >
         {{ item.habit.name }}
-      </p>
-      <div v-if="streak >= 1 && mode !== 'future'" class="flex items-center gap-2 mt-0.5">
-        <span class="text-xs text-muted flex items-center gap-0.5">
-          <span>🔥</span>
-          <span>{{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
-        </span>
-        <span
-          v-if="weeklyProgress"
-          class="text-xs font-medium px-1.5 py-0.5 rounded-full"
-          :class="weeklyBadgeClass"
-        >
-          {{ weeklyBadgeLabel }}
-        </span>
-      </div>
-      <span
-        v-else-if="weeklyProgress && mode !== 'future'"
-        class="text-xs font-medium px-1.5 py-0.5 rounded-full mt-0.5 inline-block"
-        :class="weeklyBadgeClass"
-      >
-        {{ weeklyBadgeLabel }}
       </span>
-    </div>
-
+      <span
+        v-if="(streak >= 1 || weeklyProgress || item.skipped) && mode !== 'future'"
+        class="habit-row-meta"
+      >
+        <span v-if="streak >= 1">🔥 {{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
+        <AkBadge
+          v-if="weeklyProgress"
+          :variant="weeklyBadgeVariant"
+          :label="weeklyBadgeLabel"
+        />
+        <span
+          v-if="item.skipped"
+          class="text-accent"
+        >Pulado</span>
+      </span>
     </button>
 
-    <!-- Editable: check + optional skip + note -->
-    <div v-if="isEditable" class="flex items-center gap-1.5 shrink-0">
-      <!-- Note button -->
-      <button
-        class="h-8 w-8 rounded-full flex items-center justify-center transition-all active:scale-90"
-        @click="$emit('openNote')"
+    <template #trailing>
+      <div
+        v-if="isEditable"
+        class="habit-row-actions"
       >
-        <UIcon
-          name="i-lucide-sticky-note"
-          class="text-base"
-          :class="item.note ? 'text-primary' : 'text-muted/50'"
+        <AkIconButton
+          variant="ghost"
+          size="sm"
+          label="Nota"
+          @click="emit('openNote')"
+        >
+          <AppIcon
+            name="lucide:sticky-note"
+            :size="18"
+            :class="item.note ? 'text-accent' : 'text-muted'"
+          />
+        </AkIconButton>
+
+        <AkIconButton
+          v-if="item.canSkip || item.skipped"
+          variant="ghost"
+          size="sm"
+          :label="item.skipped ? 'Desfazer pulo' : 'Pular hoje'"
+          @click="emit('skip')"
+        >
+          <AppIcon
+            :name="item.skipped ? 'lucide:undo-2' : 'lucide:forward'"
+            :size="16"
+          />
+        </AkIconButton>
+
+        <button
+          v-if="!item.skipped"
+          class="check-toggle"
+          :class="{ 'check-toggle--on': item.completed }"
+          type="button"
+          aria-label="Marcar hábito"
+          @click="handleToggle"
+        >
+          <AppIcon
+            v-if="item.completed"
+            name="lucide:check"
+            :size="14"
+          />
+        </button>
+      </div>
+
+      <div
+        v-else-if="mode === 'past'"
+        class="check-toggle"
+        :class="{ 'check-toggle--on': item.completed }"
+      >
+        <AppIcon
+          :name="item.completed ? 'lucide:check' : 'lucide:x'"
+          :size="14"
         />
-      </button>
+      </div>
 
-      <!-- Skip button (only when canSkip or already skipped) -->
-      <button
-        v-if="item.canSkip || item.skipped"
-        class="h-7 px-2 rounded-full text-xs font-medium transition-all active:scale-95 flex items-center gap-1"
-        :class="item.skipped
-          ? 'bg-elevated text-muted border border-default'
-          : 'bg-elevated/60 text-muted hover:bg-elevated border border-dashed border-muted/50'"
-        @click="$emit('skip')"
-      >
-        <UIcon :name="item.skipped ? 'i-lucide-undo-2' : 'i-lucide-forward'" class="text-xs" />
-        <span>{{ item.skipped ? 'desfazer' : 'skip' }}</span>
-      </button>
-
-      <!-- Check circle (hidden when skipped) -->
-      <button
-        v-if="!item.skipped"
-        class="w-7 h-7 rounded-full border-2 flex items-center justify-center transition-all shrink-0 active:scale-90"
-        :class="item.completed
-          ? 'bg-primary border-primary'
-          : 'border-accented hover:border-primary/60'"
-        @click="handleToggle"
-      >
-        <UIcon v-if="item.completed" name="i-lucide-check" class="text-white text-sm" />
-      </button>
-    </div>
-
-    <!-- Past: static ✓ or ✗ -->
-    <div
-      v-else-if="mode === 'past'"
-      class="w-9 h-9 rounded-full flex items-center justify-center shrink-0"
-      :class="item.completed ? 'bg-primary/15' : 'bg-elevated'"
-    >
-      <UIcon
-        :name="item.completed ? 'i-lucide-check' : 'i-lucide-x'"
-        class="text-sm"
-        :class="item.completed ? 'text-primary' : 'text-muted'"
+      <div
+        v-else-if="mode === 'future'"
+        class="check-toggle check-toggle--future"
+        aria-hidden="true"
       />
-    </div>
-
-    <!-- Future: dashed planned indicator -->
-    <div
-      v-else-if="mode === 'future'"
-      class="w-9 h-9 rounded-full border-2 border-dashed border-muted/40 flex items-center justify-center shrink-0"
-    >
-      <div class="w-2 h-2 rounded-full bg-muted/40" />
-    </div>
-  </div>
+    </template>
+  </AkListRow>
 </template>
+
+<style scoped>
+.habit-row__main {
+  display: flex;
+  width: 100%;
+  min-width: 0;
+  flex-direction: column;
+  align-items: flex-start;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  text-align: left;
+}
+
+.habit-row__main:disabled {
+  cursor: default;
+}
+
+.habit-row__main:focus-visible {
+  outline: none;
+  border-radius: var(--radius-sm);
+  box-shadow: var(--focus-ring);
+}
+
+.habit-row--dimmed {
+  opacity: 0.62;
+}
+</style>

@@ -5,6 +5,11 @@ import { getHabitColor } from '~/utils/colors'
 
 const { user, logout } = useAuth()
 const { activeHabits, archivedHabits, addHabit, updateHabit, archiveHabit, unarchiveHabit, deleteHabit } = useHabits()
+const { mode, setMode } = useAppTheme()
+const isDark = computed({
+  get: () => mode.value === 'dark',
+  set: (v: boolean) => setMode(v ? 'dark' : 'light')
+})
 const showArchived = ref(false)
 const confirmDeleteId = ref<string | null>(null)
 
@@ -12,14 +17,15 @@ function handleDelete() {
   if (!confirmDeleteId.value) return
   deleteHabit(confirmDeleteId.value)
   confirmDeleteId.value = null
-  toast.add({ title: 'Hábito excluído', icon: 'i-lucide-trash-2', color: 'neutral' })
+  toast.neutral('Hábito excluído')
 }
 
 function closeConfirmDelete(val: boolean) {
   if (!val) confirmDeleteId.value = null
 }
+
 const { exportJSON, importJSON } = useExport()
-const toast = useToast()
+const toast = useAppToast()
 
 const isModalOpen = ref(false)
 const editingHabit = ref<Habit | undefined>(undefined)
@@ -37,18 +43,17 @@ function openEdit(habit: Habit) {
 function handleSubmit(data: Omit<Habit, 'id' | 'order'>) {
   if (editingHabit.value) {
     updateHabit(editingHabit.value.id, data)
-    toast.add({ title: 'Hábito atualizado!', icon: 'i-lucide-check', color: 'success' })
-  }
-  else {
+    toast.success('Hábito atualizado!')
+  } else {
     addHabit(data)
-    toast.add({ title: 'Hábito criado!', icon: 'i-lucide-check', color: 'success' })
+    toast.success('Hábito criado!')
   }
   isModalOpen.value = false
 }
 
 function handleArchive(habit: Habit) {
   archiveHabit(habit.id)
-  toast.add({ title: `"${habit.name}" arquivado`, icon: 'i-lucide-archive', color: 'neutral' })
+  toast.neutral(`"${habit.name}" arquivado`)
 }
 
 async function handleImport(e: Event) {
@@ -57,10 +62,9 @@ async function handleImport(e: Event) {
   if (!file) return
   try {
     await importJSON(file)
-    toast.add({ title: 'Dados importados com sucesso!', icon: 'i-lucide-download', color: 'success' })
-  }
-  catch (err) {
-    toast.add({ title: 'Erro ao importar', description: String(err), color: 'error' })
+    toast.success('Dados importados com sucesso!')
+  } catch (err) {
+    toast.error('Erro ao importar', String(err))
   }
   input.value = ''
 }
@@ -69,233 +73,388 @@ const modalTitle = computed(() => editingHabit.value ? 'Editar hábito' : 'Novo 
 const modalKey = computed(() => editingHabit.value?.id ?? 'new')
 
 const { $pwa } = useNuxtApp()
+const importInput = ref<HTMLInputElement | null>(null)
+
+function habitSubtitle(habit: Habit) {
+  const recurrence = habit.recurrence.type === 'weekly_x'
+    ? `${habit.recurrence.timesPerWeek}x por semana`
+    : recurrenceLabel(habit.recurrence.type)
+  const periods = habit.periods?.length ? ` · ${getHabitPeriodsLabel(habit.periods)}` : ''
+  return recurrence + periods
+}
 </script>
 
 <template>
-  <div class="flex flex-col h-full overflow-y-auto">
-    <!-- Header -->
-    <header class="sticky top-0 z-10 bg-white/95 dark:bg-zinc-900/95 backdrop-blur-sm border-b border-default px-4" style="padding-top: env(safe-area-inset-top, 0px)">
-      <div class="flex items-center h-14">
-        <h1 class="font-bold text-lg">Hábitos</h1>
-      </div>
+  <div class="app-page app-scroll">
+    <header class="page-header-simple">
+      <span class="page-label">Gerenciar</span>
+      <h1 class="page-title">
+        Hábitos
+      </h1>
     </header>
 
-    <div class="flex-1 px-4 pt-4 pb-6 flex flex-col gap-6">
-      <!-- Habit list -->
+    <div class="page-body page-body--flush-top stack--lg">
       <section>
-        <div v-if="activeHabits.length" class="flex flex-col gap-2">
-          <div
-            v-for="habit in activeHabits"
-            :key="habit.id"
-            class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-zinc-200 dark:border-zinc-700 bg-white dark:bg-zinc-800"
+        <AkSectionHeader title="Ativos">
+          <template
+            v-if="activeHabits.length"
+            #action
           >
-            <div
-              class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
-              :style="{ backgroundColor: getHabitColor(habit.color).light }"
+            <AkButton
+              variant="ghost"
+              size="sm"
+              @click="openAdd"
             >
-              {{ habit.emoji }}
-            </div>
-            <div class="flex-1 min-w-0">
-              <p class="font-medium text-base truncate">{{ habit.name }}</p>
-              <p class="text-xs text-muted">
-                {{ habit.recurrence.type === 'weekly_x'
-                  ? `${habit.recurrence.timesPerWeek}x por semana`
-                  : recurrenceLabel(habit.recurrence.type) }}
-                <span v-if="habit.periods && habit.periods.length"> · {{ getHabitPeriodsLabel(habit.periods) }}</span>
-              </p>
-            </div>
-            <div class="flex gap-1 shrink-0">
-              <UButton icon="i-lucide-pencil" variant="ghost" color="neutral" size="xs" @click="openEdit(habit)" />
-              <UButton icon="i-lucide-archive" variant="ghost" color="neutral" size="xs" @click="handleArchive(habit)" />
-              <UButton icon="i-lucide-trash-2" variant="ghost" color="error" size="xs" @click="confirmDeleteId = habit.id" />
-            </div>
-          </div>
-        </div>
+              <template #icon>
+                <AppIcon
+                  name="lucide:plus"
+                  :size="16"
+                />
+              </template>
+              Adicionar
+            </AkButton>
+          </template>
+        </AkSectionHeader>
 
-        <!-- Empty state -->
-        <div v-else class="flex flex-col items-center justify-center py-10 text-center">
-          <div class="text-4xl mb-3">🌱</div>
-          <p class="font-medium mb-1">Nenhum hábito cadastrado</p>
-          <p class="text-sm text-muted mb-4">Comece adicionando seu primeiro hábito</p>
-          <UButton icon="i-lucide-plus" size="sm" @click="openAdd">
-            Adicionar hábito
-          </UButton>
-        </div>
-      </section>
-
-      <!-- Archived habits -->
-      <section v-if="archivedHabits.length" class="border-t border-default pt-6">
-        <button
-          class="flex items-center justify-between w-full mb-3"
-          @click="showArchived = !showArchived"
-        >
-          <h2 class="text-xs font-semibold text-muted uppercase tracking-wider">
-            Arquivados ({{ archivedHabits.length }})
-          </h2>
-          <UIcon
-            :name="showArchived ? 'i-lucide-chevron-up' : 'i-lucide-chevron-down'"
-            class="text-muted text-sm"
-          />
-        </button>
-        <Transition
-          enter-active-class="transition-all duration-200"
-          enter-from-class="opacity-0 -translate-y-1"
-          enter-to-class="opacity-100 translate-y-0"
-          leave-active-class="transition-all duration-150"
-          leave-from-class="opacity-100 translate-y-0"
-          leave-to-class="opacity-0 -translate-y-1"
-        >
-          <div v-if="showArchived" class="flex flex-col gap-2">
-            <div
-              v-for="habit in archivedHabits"
-              :key="habit.id"
-              class="flex items-center gap-3 px-4 py-3 rounded-2xl border border-zinc-200/60 dark:border-zinc-700/40 bg-zinc-50 dark:bg-zinc-800/50 opacity-60"
-            >
+        <AkList v-if="activeHabits.length">
+          <AkListRow
+            v-for="(habit, index) in activeHabits"
+            :key="habit.id"
+            :divider="index < activeHabits.length - 1"
+            padding="md"
+          >
+            <template #leading>
               <div
-                class="text-2xl w-11 h-11 flex items-center justify-center rounded-2xl shrink-0"
+                class="habit-emoji"
                 :style="{ backgroundColor: getHabitColor(habit.color).light }"
               >
                 {{ habit.emoji }}
               </div>
-              <div class="flex-1 min-w-0">
-                <p class="font-medium text-base truncate">{{ habit.name }}</p>
-                <p class="text-xs text-muted">
-                  {{ recurrenceLabel(habit.recurrence.type) }}
-                  <span v-if="habit.periods && habit.periods.length"> · {{ getHabitPeriodsLabel(habit.periods) }}</span>
-                </p>
+            </template>
+            <span class="habit-row-name">{{ habit.name }}</span>
+            <template #subtitle>
+              <span class="text-xs text-muted">{{ habitSubtitle(habit) }}</span>
+            </template>
+            <template #trailing>
+              <div class="habit-row-actions">
+                <AkIconButton
+                  variant="ghost"
+                  size="sm"
+                  label="Editar"
+                  @click="openEdit(habit)"
+                >
+                  <AppIcon
+                    name="lucide:pencil"
+                    :size="16"
+                  />
+                </AkIconButton>
+                <AkIconButton
+                  variant="ghost"
+                  size="sm"
+                  label="Arquivar"
+                  @click="handleArchive(habit)"
+                >
+                  <AppIcon
+                    name="lucide:archive"
+                    :size="16"
+                  />
+                </AkIconButton>
+                <AkIconButton
+                  variant="ghost"
+                  size="sm"
+                  label="Excluir"
+                  @click="confirmDeleteId = habit.id"
+                >
+                  <AppIcon
+                    name="lucide:trash-2"
+                    :size="16"
+                  />
+                </AkIconButton>
               </div>
-              <UButton
-                icon="i-lucide-archive-restore"
-                variant="ghost"
-                color="neutral"
-                size="xs"
-                @click="unarchiveHabit(habit.id)"
+            </template>
+          </AkListRow>
+        </AkList>
+
+        <div
+          v-else
+          class="empty-wrap--compact"
+        >
+          <AkEmptyState
+            title="Nenhum hábito cadastrado"
+            description="Comece adicionando seu primeiro hábito."
+          >
+            <template #icon>
+              <span style="font-size: 2rem">🌱</span>
+            </template>
+            <template #action>
+              <AkButton
+                size="sm"
+                @click="openAdd"
+              >
+                <template #icon>
+                  <AppIcon
+                    name="lucide:plus"
+                    :size="16"
+                  />
+                </template>
+                Adicionar hábito
+              </AkButton>
+            </template>
+          </AkEmptyState>
+        </div>
+      </section>
+
+      <section v-if="archivedHabits.length">
+        <AkSectionHeader :title="`Arquivados (${archivedHabits.length})`">
+          <template #action>
+            <AkIconButton
+              variant="ghost"
+              size="sm"
+              :label="showArchived ? 'Recolher' : 'Expandir'"
+              @click="showArchived = !showArchived"
+            >
+              <AppIcon
+                :name="showArchived ? 'lucide:chevron-up' : 'lucide:chevron-down'"
+                :size="16"
               />
-              <UButton
-                icon="i-lucide-trash-2"
-                variant="ghost"
-                color="error"
-                size="xs"
-                @click="confirmDeleteId = habit.id"
-              />
-            </div>
-          </div>
+            </AkIconButton>
+          </template>
+        </AkSectionHeader>
+
+        <Transition name="accordion">
+          <AkList
+            v-if="showArchived"
+            class="opacity-muted"
+          >
+            <AkListRow
+              v-for="(habit, index) in archivedHabits"
+              :key="habit.id"
+              :divider="index < archivedHabits.length - 1"
+              padding="md"
+            >
+              <template #leading>
+                <div
+                  class="habit-emoji"
+                  :style="{ backgroundColor: getHabitColor(habit.color).light }"
+                >
+                  {{ habit.emoji }}
+                </div>
+              </template>
+              <span class="habit-row-name text-muted">{{ habit.name }}</span>
+              <template #subtitle>
+                <span class="text-xs text-muted">{{ habitSubtitle(habit) }}</span>
+              </template>
+              <template #trailing>
+                <div class="habit-row-actions">
+                  <AkIconButton
+                    variant="ghost"
+                    size="sm"
+                    label="Restaurar"
+                    @click="unarchiveHabit(habit.id)"
+                  >
+                    <AppIcon
+                      name="lucide:archive-restore"
+                      :size="16"
+                    />
+                  </AkIconButton>
+                  <AkIconButton
+                    variant="ghost"
+                    size="sm"
+                    label="Excluir"
+                    @click="confirmDeleteId = habit.id"
+                  >
+                    <AppIcon
+                      name="lucide:trash-2"
+                      :size="16"
+                    />
+                  </AkIconButton>
+                </div>
+              </template>
+            </AkListRow>
+          </AkList>
         </Transition>
       </section>
 
-      <!-- Appearance section -->
-      <section class="border-t border-default pt-6">
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Aparência</h2>
-        <div class="flex items-center justify-between px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default">
-          <div class="flex items-center gap-3">
-            <UIcon name="i-lucide-sun-moon" class="text-primary text-lg shrink-0" />
-            <div>
-              <p class="font-medium text-sm">Tema</p>
-              <p class="text-xs text-muted">Claro, escuro ou automático</p>
-            </div>
-          </div>
-          <UColorModeSelect size="sm" variant="outline" />
-        </div>
+      <section>
+        <AkSectionHeader title="Aparência" />
+        <AkList>
+          <AkListRow padding="md">
+            <span class="text-sm font-semibold">Tema escuro</span>
+            <template #subtitle>
+              <span class="text-xs text-muted">Alternar entre claro e escuro</span>
+            </template>
+            <template #trailing>
+              <AkSwitch v-model="isDark" />
+            </template>
+          </AkListRow>
+        </AkList>
       </section>
 
-      <!-- Install section -->
-      <section v-if="$pwa?.showInstallPrompt" class="border-t border-default pt-6">
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Aplicativo</h2>
-        <button
-          class="w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-primary/10 border border-primary/20 hover:bg-primary/15 transition-colors text-left"
-          @click="$pwa?.install()"
-        >
-          <UIcon name="i-lucide-download" class="text-primary text-lg shrink-0" />
-          <div>
-            <p class="font-medium text-sm text-primary">Instalar aplicativo</p>
-            <p class="text-xs text-muted">Adicionar à tela inicial como app</p>
-          </div>
-        </button>
-      </section>
-
-      <!-- Account section -->
-      <section class="border-t border-default pt-6">
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Conta</h2>
-        <div class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default">
-          <img
-            v-if="user?.photoURL"
-            :src="user.photoURL"
-            class="w-8 h-8 rounded-full shrink-0"
-            referrerpolicy="no-referrer"
+      <section v-if="$pwa?.showInstallPrompt">
+        <AkSectionHeader title="Aplicativo" />
+        <AkList>
+          <AkListRow
+            interactive
+            padding="md"
+            @click="$pwa?.install()"
           >
-          <UIcon v-else name="i-lucide-user-circle" class="text-primary text-xl shrink-0" />
-          <div class="flex-1 min-w-0">
-            <p class="font-medium text-sm truncate">{{ user?.displayName ?? user?.email }}</p>
-            <p class="text-xs text-muted truncate">{{ user?.email }}</p>
-          </div>
-          <UButton variant="ghost" color="neutral" size="xs" icon="i-lucide-log-out" @click="logout" />
-        </div>
+            <AppIcon
+              name="lucide:download"
+              :size="20"
+              class="text-accent"
+            />
+            <span class="text-sm font-semibold text-accent">Instalar aplicativo</span>
+            <template #subtitle>
+              <span class="text-xs text-muted">Adicionar à tela inicial</span>
+            </template>
+            <template #trailing>
+              <AppIcon
+                name="lucide:chevron-right"
+                :size="16"
+                class="text-muted"
+              />
+            </template>
+          </AkListRow>
+        </AkList>
       </section>
 
-      <!-- Data section -->
-      <section class="border-t border-default pt-6">
-        <h2 class="text-xs font-semibold text-muted uppercase tracking-wider mb-3">Dados</h2>
-        <div class="flex flex-col gap-2">
-          <button
-            class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default hover:bg-elevated transition-colors text-left"
+      <section>
+        <AkSectionHeader title="Conta" />
+        <AkList>
+          <AkListRow padding="md">
+            <template #leading>
+              <img
+                v-if="user?.photoURL"
+                :src="user.photoURL"
+                class="avatar"
+                referrerpolicy="no-referrer"
+                alt=""
+              >
+              <AppIcon
+                v-else
+                name="lucide:user-circle"
+                :size="28"
+                class="text-accent"
+              />
+            </template>
+            <span class="text-sm font-semibold truncate">{{ user?.displayName ?? user?.email }}</span>
+            <template #subtitle>
+              <span class="text-xs text-muted truncate">{{ user?.email }}</span>
+            </template>
+            <template #trailing>
+              <AkIconButton
+                variant="ghost"
+                size="sm"
+                label="Sair"
+                @click="logout"
+              >
+                <AppIcon
+                  name="lucide:log-out"
+                  :size="16"
+                />
+              </AkIconButton>
+            </template>
+          </AkListRow>
+        </AkList>
+      </section>
+
+      <section>
+        <AkSectionHeader title="Dados" />
+        <AkList>
+          <AkListRow
+            interactive
+            padding="md"
             @click="exportJSON"
           >
-            <UIcon name="i-lucide-upload" class="text-primary text-lg shrink-0" />
-            <div>
-              <p class="font-medium text-sm">Exportar dados</p>
-              <p class="text-xs text-muted">Baixar todos os hábitos e progresso em JSON</p>
-            </div>
-          </button>
-
-          <label class="flex items-center gap-3 px-4 py-3.5 rounded-2xl bg-elevated/40 border border-default hover:bg-elevated transition-colors cursor-pointer">
-            <UIcon name="i-lucide-download" class="text-primary text-lg shrink-0" />
-            <div class="flex-1">
-              <p class="font-medium text-sm">Importar dados</p>
-              <p class="text-xs text-muted">Mesclar dados de um arquivo JSON exportado</p>
-            </div>
-            <input type="file" accept=".json" class="hidden" @change="handleImport">
-          </label>
-        </div>
+            <AppIcon
+              name="lucide:upload"
+              :size="20"
+              class="text-accent"
+            />
+            <span class="text-sm font-semibold">Exportar dados</span>
+            <template #subtitle>
+              <span class="text-xs text-muted">Baixar hábitos e progresso em JSON</span>
+            </template>
+            <template #trailing>
+              <AppIcon
+                name="lucide:chevron-right"
+                :size="16"
+                class="text-muted"
+              />
+            </template>
+          </AkListRow>
+          <AkListRow
+            padding="md"
+            :divider="false"
+            interactive
+            @click="importInput?.click()"
+          >
+            <AppIcon
+              name="lucide:download"
+              :size="20"
+              class="text-accent"
+            />
+            <span class="text-sm font-semibold">Importar dados</span>
+            <template #subtitle>
+              <span class="text-xs text-muted">Mesclar de um arquivo JSON</span>
+            </template>
+            <template #trailing>
+              <AppIcon
+                name="lucide:chevron-right"
+                :size="16"
+                class="text-muted"
+              />
+            </template>
+          </AkListRow>
+        </AkList>
+        <input
+          ref="importInput"
+          type="file"
+          accept=".json"
+          class="sr-only"
+          @change="handleImport"
+        >
       </section>
     </div>
 
-    <!-- FAB -->
-    <button
-      class="fixed bottom-20 right-4 z-20 w-14 h-14 rounded-full bg-primary text-white shadow-lg flex items-center justify-center active:scale-95 transition-transform"
-      style="bottom: calc(env(safe-area-inset-bottom, 0px) + 5rem); right: 1rem"
-      @click="openAdd"
-    >
-      <UIcon name="i-lucide-plus" class="text-2xl" />
-    </button>
-
-    <!-- Confirm delete sheet -->
     <AppBottomSheet
       :open="!!confirmDeleteId"
       title="Excluir hábito"
       @update:open="closeConfirmDelete"
     >
-      <div class="px-5 pt-1 pb-8 flex flex-col gap-4">
+      <div class="form-stack">
         <p class="text-sm text-muted">
-          Tem certeza? Isso vai excluir o hábito e <strong class="text-default">todo o histórico</strong> permanentemente. Essa ação não pode ser desfeita.
+          Tem certeza? Isso vai excluir o hábito e <strong>todo o histórico</strong> permanentemente.
         </p>
-        <div class="flex gap-3">
-          <UButton variant="outline" color="neutral" class="flex-1" @click="confirmDeleteId = null">
+        <div class="form-actions">
+          <AkButton
+            variant="secondary"
+            block
+            @click="confirmDeleteId = null"
+          >
             Cancelar
-          </UButton>
-          <UButton
-            color="error"
-            class="flex-1"
-            icon="i-lucide-trash-2"
+          </AkButton>
+          <AkButton
+            variant="danger"
+            block
             @click="handleDelete"
           >
+            <template #icon>
+              <AppIcon
+                name="lucide:trash-2"
+                :size="16"
+              />
+            </template>
             Excluir
-          </UButton>
+          </AkButton>
         </div>
       </div>
     </AppBottomSheet>
 
-    <!-- Bottom sheet -->
-    <AppBottomSheet v-model:open="isModalOpen" :title="modalTitle">
+    <AppBottomSheet
+      v-model:open="isModalOpen"
+      :title="modalTitle"
+    >
       <HabitForm
         :key="modalKey"
         :habit="editingHabit"
@@ -305,3 +464,20 @@ const { $pwa } = useNuxtApp()
     </AppBottomSheet>
   </div>
 </template>
+
+<style scoped>
+.empty-wrap--compact {
+  padding: var(--space-8) 0;
+}
+
+.avatar {
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-full);
+  flex-shrink: 0;
+}
+
+.opacity-muted {
+  opacity: 0.72;
+}
+</style>

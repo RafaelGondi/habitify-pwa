@@ -22,7 +22,7 @@ export function useHabits() {
     return doc(db, 'users', user.value!.uid, 'habits', id)
   }
 
-  function addHabit(input: Omit<Habit, 'id' | 'order'> & { createdAt?: string }): Habit {
+  function addHabit(input: Omit<Habit, 'id' | 'order' | 'createdAt'> & { createdAt?: string }): Habit {
     const habit: Habit = {
       ...input,
       id: crypto.randomUUID(),

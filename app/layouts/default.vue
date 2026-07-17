@@ -7,15 +7,29 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="flex flex-col bg-white dark:bg-zinc-950" style="height: 100dvh; max-width: 480px; margin: 0 auto">
+  <div class="app-root">
+    <AkAmbientBg contained />
     <template v-if="authReady && user">
-      <main class="flex-1 overflow-hidden min-h-0">
+      <main class="app-main">
         <slot />
       </main>
       <AppBottomNav />
     </template>
-    <div v-else class="flex-1 flex items-center justify-center">
-      <UIcon name="i-lucide-loader-circle" class="text-primary text-2xl animate-spin" />
+    <div
+      v-else
+      class="loader-center"
+    >
+      <AppIcon
+        name="lucide:loader-circle"
+        :size="28"
+        class="spin text-accent"
+      />
     </div>
   </div>
 </template>
+
+<style scoped>
+.text-accent {
+  color: var(--accent);
+}
+</style>

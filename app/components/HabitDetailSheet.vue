@@ -22,7 +22,6 @@ function generateGrid(habit: Habit, completions: Completion[]): Cell[][] {
   const todayStr = toDateString(today)
   const habitStart = habit.createdAt.slice(0, 10)
 
-  // Find this Monday
   const dow = today.getDay()
   const daysToMon = dow === 0 ? 6 : dow - 1
   const thisMon = new Date(today.getTime() - daysToMon * 86400000)
@@ -42,17 +41,19 @@ function generateGrid(habit: Habit, completions: Completion[]): Cell[][] {
 
       const completed = completions.some(c => c.habitId === habit.id && c.date === dateStr)
       if (completed) return { dateStr, status: 'completed' as CellStatus }
-      // weekly_x: non-completed days are just "not-scheduled" visually (no red)
       return { dateStr, status: isWeeklyX ? 'not-scheduled' : 'missed' }
     }),
   )
 }
 
 function getMonthLabel(grid: Cell[][], wi: number): string {
-  const firstReal = grid[wi].find(c => c.status !== 'before' && c.status !== 'future')
+  const week = grid[wi]
+  if (!week) return ''
+  const firstReal = week.find(c => c.status !== 'before' && c.status !== 'future')
   if (!firstReal) return ''
   const d = new Date(firstReal.dateStr + 'T12:00:00')
-  const prevCol = wi > 0 ? grid[wi - 1].find(c => c.status !== 'before' && c.status !== 'future') : null
+  const previousWeek = wi > 0 ? grid[wi - 1] : undefined
+  const prevCol = previousWeek?.find(c => c.status !== 'before' && c.status !== 'future') ?? null
   if (!prevCol) return d.toLocaleDateString('pt-BR', { month: 'short' })
   const prevD = new Date(prevCol.dateStr + 'T12:00:00')
   if (d.getMonth() !== prevD.getMonth()) return d.toLocaleDateString('pt-BR', { month: 'short' })
@@ -61,11 +62,11 @@ function getMonthLabel(grid: Cell[][], wi: number): string {
 
 function cellClass(status: CellStatus): string {
   switch (status) {
-    case 'completed': return 'bg-primary'
-    case 'missed': return 'bg-red-400/35'
-    case 'not-scheduled': return 'bg-elevated/60'
+    case 'completed': return 'heatmap-cell heatmap-cell--done'
+    case 'missed': return 'heatmap-cell heatmap-cell--missed'
+    case 'not-scheduled': return 'heatmap-cell heatmap-cell--idle'
     case 'before':
-    case 'future': return 'bg-transparent'
+    case 'future': return 'heatmap-cell heatmap-cell--empty'
   }
 }
 
@@ -98,97 +99,81 @@ const thisMonthRate = computed(() => {
   return due ? Math.round((done / due) * 100) : 0
 })
 
-const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D'] // Mon→Sun
+const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
 </script>
 
 <template>
   <AppBottomSheet :open="open" :title="habit ? `${habit.emoji} ${habit.name}` : ''" @update:open="$emit('update:open', $event)">
-    <div v-if="habit" class="flex flex-col gap-5 px-5 pt-1 pb-6">
-        <!-- Stats row -->
-        <div class="grid grid-cols-3 gap-2">
-          <div class="flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-elevated/50 py-3">
-            <span class="text-xl">🔥</span>
-            <span class="text-lg font-bold text-default leading-none">{{ currentStreak }}</span>
-            <span class="text-[10px] text-muted text-center leading-tight">streak atual</span>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-elevated/50 py-3">
-            <span class="text-xl">🏆</span>
-            <span class="text-lg font-bold text-default leading-none">{{ longestStreak }}</span>
-            <span class="text-[10px] text-muted text-center leading-tight">maior streak</span>
-          </div>
-          <div class="flex flex-col items-center justify-center gap-0.5 rounded-2xl bg-elevated/50 py-3">
-            <span class="text-xl">✅</span>
-            <span class="text-lg font-bold text-default leading-none">{{ totalCompletions }}</span>
-            <span class="text-[10px] text-muted text-center leading-tight">total feitos</span>
+    <div v-if="habit" class="detail-body">
+      <div class="stats-grid">
+        <div class="stat-cell">
+          <div class="stat-cell__value">🔥 {{ currentStreak }}</div>
+          <div class="stat-cell__label">streak atual</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__value">🏆 {{ longestStreak }}</div>
+          <div class="stat-cell__label">maior streak</div>
+        </div>
+        <div class="stat-cell">
+          <div class="stat-cell__value">✅ {{ totalCompletions }}</div>
+          <div class="stat-cell__label">total feitos</div>
+        </div>
+      </div>
+
+      <AkProgress
+        :value="thisMonthRate"
+        label="Taxa este mês"
+        show-value
+      />
+
+      <div class="info-row">
+        <span class="text-sm text-muted">Turno prioritário</span>
+        <span class="text-sm font-semibold">{{ getHabitPeriodsLabel(habit.periods) }}</span>
+      </div>
+
+      <div>
+        <AkSectionHeader title="Histórico" />
+        <div class="heatmap-wrap">
+          <div class="heatmap">
+            <div class="heatmap-col" style="margin-right: 2px; justify-content: flex-end; padding-bottom: 1px">
+              <div v-for="label in DAY_LABELS" :key="label" class="heatmap-label">{{ label }}</div>
+            </div>
+            <div v-for="(week, wi) in grid" :key="wi" class="heatmap-col">
+              <div class="heatmap-month">{{ getMonthLabel(grid, wi) }}</div>
+              <div
+                v-for="(cell, di) in week"
+                :key="di"
+                :class="cellClass(cell.status)"
+                :title="cell.dateStr"
+              />
+            </div>
           </div>
         </div>
 
-        <!-- This month rate -->
-        <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-elevated/50">
-          <span class="text-sm text-muted">Taxa este mês</span>
-          <div class="flex items-center gap-2">
-            <div class="w-20 h-1.5 rounded-full bg-elevated overflow-hidden">
-              <div class="h-full rounded-full bg-primary transition-all" :style="{ width: thisMonthRate + '%' }" />
-            </div>
-            <span class="text-sm font-semibold text-default w-8 text-right">{{ thisMonthRate }}%</span>
+        <div class="legend-row">
+          <div class="legend-item">
+            <div class="legend-swatch heatmap-cell--done" />
+            <span>Feito</span>
+          </div>
+          <div v-if="habit.recurrence.type !== 'weekly_x'" class="legend-item">
+            <div class="legend-swatch heatmap-cell--missed" />
+            <span>Não feito</span>
+          </div>
+          <div class="legend-item">
+            <div class="legend-swatch heatmap-cell--idle" />
+            <span>Não previsto</span>
           </div>
         </div>
-
-        <div class="flex items-center justify-between px-4 py-3 rounded-2xl bg-elevated/50">
-          <span class="text-sm text-muted">Turno prioritário</span>
-          <span class="text-sm font-semibold text-default">{{ getHabitPeriodsLabel(habit.periods) }}</span>
-        </div>
-
-        <!-- Heatmap -->
-        <div>
-          <p class="text-xs font-semibold text-muted uppercase tracking-wider mb-2">Histórico</p>
-          <div class="overflow-x-auto pb-1">
-            <div class="flex gap-1 min-w-max">
-              <!-- Day labels -->
-              <div class="flex flex-col gap-[3px] mr-0.5 justify-end" style="padding-bottom: 1px">
-                <div
-                  v-for="label in DAY_LABELS"
-                  :key="label"
-                  class="h-3 w-3 text-[8px] text-muted flex items-center justify-center"
-                >
-                  {{ label }}
-                </div>
-              </div>
-
-              <!-- Week columns -->
-              <div v-for="(week, wi) in grid" :key="wi" class="flex flex-col gap-[3px]">
-                <!-- Month label -->
-                <div class="h-3 text-[8px] text-muted flex items-end justify-start leading-none mb-0.5">
-                  {{ getMonthLabel(grid, wi) }}
-                </div>
-                <!-- Day cells -->
-                <div
-                  v-for="(cell, di) in week"
-                  :key="di"
-                  class="w-3 h-3 rounded-[3px]"
-                  :class="cellClass(cell.status)"
-                  :title="cell.dateStr"
-                />
-              </div>
-            </div>
-          </div>
-
-          <!-- Legend -->
-          <div class="flex items-center gap-3 mt-2 flex-wrap">
-            <div class="flex items-center gap-1">
-              <div class="w-2.5 h-2.5 rounded-[2px] bg-primary" />
-              <span class="text-[10px] text-muted">Feito</span>
-            </div>
-            <div v-if="habit.recurrence.type !== 'weekly_x'" class="flex items-center gap-1">
-              <div class="w-2.5 h-2.5 rounded-[2px] bg-red-400/35" />
-              <span class="text-[10px] text-muted">Não feito</span>
-            </div>
-            <div class="flex items-center gap-1">
-              <div class="w-2.5 h-2.5 rounded-[2px] bg-elevated/60" />
-              <span class="text-[10px] text-muted">Não previsto</span>
-            </div>
-          </div>
-        </div>
+      </div>
     </div>
   </AppBottomSheet>
 </template>
+
+<style scoped>
+.detail-body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+  padding: var(--space-1) var(--page-pad-x) var(--space-6);
+}
+</style>
