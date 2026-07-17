@@ -13,6 +13,7 @@ useHead({
   htmlAttrs: {
     lang: 'pt-BR',
     'data-mood': 'app',
+    'data-accent': 'teal',
   },
 })
 

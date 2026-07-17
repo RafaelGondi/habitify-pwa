@@ -1,3 +1,8 @@
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const rootDir = fileURLToPath(new URL('.', import.meta.url))
+
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
   modules: [
@@ -12,6 +17,17 @@ export default defineNuxtConfig({
   },
 
   css: ['~/assets/css/main.css'],
+
+  vite: {
+    resolve: {
+      alias: {
+        '@sysvale/cuida-icons': path.resolve(
+          rootDir,
+          'node_modules/@sysvale/cuida-icons/dist/index.js',
+        ),
+      },
+    },
+  },
 
   compatibilityDate: '2025-01-15',
 

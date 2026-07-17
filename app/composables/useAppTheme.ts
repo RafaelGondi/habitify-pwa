@@ -1,6 +1,9 @@
+import { applyAccentPalette, type AccentPalette } from '@rafael_dias/akoma'
+
 export type ThemeMode = 'light' | 'dark'
 
 const STORAGE_KEY = 'habitify-theme'
+const ACCENT: AccentPalette = 'teal'
 
 const THEME_COLORS: Record<ThemeMode, string> = {
   light: '#f8f6f1',
@@ -20,6 +23,7 @@ function loadTheme(): ThemeMode {
 export function applyAkomaTheme(mode: ThemeMode) {
   document.documentElement.dataset.theme = mode
   document.documentElement.dataset.mood = 'app'
+  applyAccentPalette(document.documentElement, ACCENT)
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[mode])
 }
 
