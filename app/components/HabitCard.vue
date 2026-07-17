@@ -39,6 +39,14 @@ const weeklyBadgeLabel = computed(() => {
 
 const isDimmed = computed(() => props.item.skipped)
 
+const showMeta = computed(() =>
+  (streak.value >= 1 || weeklyProgress.value || props.item.skipped) && props.mode !== 'future'
+)
+
+function openDetail() {
+  if (props.mode !== 'future') emit('detail')
+}
+
 function handleToggle(e: Event) {
   e.stopPropagation()
   if (!props.item.completed && 'vibrate' in navigator) {
@@ -50,6 +58,7 @@ function handleToggle(e: Event) {
 
 <template>
   <AkListRow
+    class="habit-card-row"
     padding="md"
     :divider="divider"
     :class="{ 'habit-row--dimmed': isDimmed }"
@@ -65,24 +74,20 @@ function handleToggle(e: Event) {
     </template>
 
     <button
-      class="habit-row__main"
+      class="habit-row__title"
+      :class="{ 'habit-row__title--done': item.completed && mode !== 'future' }"
       type="button"
       :disabled="mode === 'future'"
-      @click="emit('detail')"
+      @click="openDetail"
     >
-      <span
-        class="habit-row-name"
-        :class="{
-          'habit-row-name--done': item.completed && mode !== 'future',
-          'text-muted': mode === 'future'
-        }"
-      >
-        {{ item.habit.name }}
-      </span>
-      <span
-        v-if="(streak >= 1 || weeklyProgress || item.skipped) && mode !== 'future'"
-        class="habit-row-meta"
-      >
+      {{ item.habit.name }}
+    </button>
+
+    <template
+      v-if="showMeta"
+      #subtitle
+    >
+      <div class="habit-row-meta">
         <span v-if="streak >= 1">🔥 {{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
         <AkBadge
           v-if="weeklyProgress"
@@ -93,8 +98,8 @@ function handleToggle(e: Event) {
           v-if="item.skipped"
           class="text-accent"
         >Pulado</span>
-      </span>
-    </button>
+      </div>
+    </template>
 
     <template #trailing>
       <div
@@ -109,7 +114,7 @@ function handleToggle(e: Event) {
         >
           <AppIcon
             name="lucide:sticky-note"
-            :size="18"
+            :size="16"
             :class="item.note ? 'text-accent' : 'text-muted'"
           />
         </AkIconButton>
@@ -123,7 +128,7 @@ function handleToggle(e: Event) {
         >
           <AppIcon
             :name="item.skipped ? 'lucide:undo-2' : 'lucide:forward'"
-            :size="16"
+            :size="15"
           />
         </AkIconButton>
 
@@ -134,27 +139,17 @@ function handleToggle(e: Event) {
           type="button"
           aria-label="Marcar hábito"
           @click="handleToggle"
-        >
-          <AppIcon
-            v-if="item.completed"
-            name="lucide:check"
-            :size="11"
-          />
-        </button>
-      </div>
-
-      <div
-        v-else-if="mode === 'past'"
-        class="check-toggle"
-        :class="{ 'check-toggle--on': item.completed }"
-      >
-        <AppIcon
-          :name="item.completed ? 'lucide:check' : 'lucide:x'"
-          :size="11"
         />
       </div>
 
-      <div
+      <span
+        v-else-if="mode === 'past'"
+        class="check-toggle check-toggle--readonly"
+        :class="{ 'check-toggle--on': item.completed }"
+        aria-hidden="true"
+      />
+
+      <span
         v-else-if="mode === 'future'"
         class="check-toggle check-toggle--future"
         aria-hidden="true"
@@ -164,26 +159,53 @@ function handleToggle(e: Event) {
 </template>
 
 <style scoped>
-.habit-row__main {
-  display: flex;
+.habit-card-row :deep(.ak-list-row__content) {
+  min-width: 0;
+  overflow: hidden;
+}
+
+.habit-row__title {
+  display: block;
   width: 100%;
   min-width: 0;
-  flex-direction: column;
-  align-items: flex-start;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   border: 0;
+  padding: 0;
   background: transparent;
   color: inherit;
+  font: inherit;
+  font-weight: 650;
+  font-size: 15px;
+  letter-spacing: -0.01em;
   text-align: left;
 }
 
-.habit-row__main:disabled {
+.habit-row__title:disabled {
   cursor: default;
+  color: var(--text-secondary);
 }
 
-.habit-row__main:focus-visible {
+.habit-row__title--done {
+  color: var(--text-secondary);
+}
+
+.habit-row__title:focus-visible {
   outline: none;
   border-radius: var(--radius-sm);
   box-shadow: var(--focus-ring);
+}
+
+.habit-row--dimmed .habit-row__title:not(:disabled) {
+  color: var(--text-secondary);
+}
+
+.habit-row-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+  flex-shrink: 0;
 }
 
 .habit-row--dimmed {
