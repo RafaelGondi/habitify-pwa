@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DayRecord } from '~/types'
+import { getHabitColor } from '~/utils/colors'
 
 type HistoryRange = 7 | 30 | 'all'
 
@@ -46,22 +47,91 @@ const consistency = computed(() =>
     : 0
 )
 
+/** Strip “últimos 7 dias” — independente do filtro de consistência. */
 const currentWeekRate = computed(() => rateFor(days.value.slice(0, 7)))
-const previousWeekRate = computed(() => rateFor(days.value.slice(7, 14)))
-const trendDelta = computed(() => currentWeekRate.value - previousWeekRate.value)
+
+/**
+ * Tendência amarrada ao filtro: metade recente do período vs. metade anterior.
+ * Assim o badge acompanha 7 / 30 / todos, em vez de ficar preso na semana.
+ */
+const trendHalf = computed(() => Math.floor(visibleDays.value.length / 2))
+const hasTrendBaseline = computed(() => trendHalf.value >= 3)
+
+const recentPeriodRate = computed(() =>
+  hasTrendBaseline.value
+    ? rateFor(visibleDays.value.slice(0, trendHalf.value))
+    : 0
+)
+const olderPeriodRate = computed(() =>
+  hasTrendBaseline.value
+    ? rateFor(visibleDays.value.slice(trendHalf.value, trendHalf.value * 2))
+    : 0
+)
+const trendDelta = computed(() => recentPeriodRate.value - olderPeriodRate.value)
 
 const trendMessage = computed(() => {
-  if (days.value.length < 8) return 'Continue registrando para enxergar sua tendência.'
-  if (trendDelta.value >= 8) return 'Você ganhou ritmo nos últimos dias.'
+  if (!hasTrendBaseline.value) return 'Continue registrando para enxergar sua tendência.'
+  if (trendDelta.value >= 8) return 'Você ganhou ritmo na parte mais recente deste período.'
   if (trendDelta.value <= -8) return 'Retomar com um hábito já conta.'
-  return 'Seu ritmo está estável nesta semana.'
+  return 'Seu ritmo está estável neste período.'
 })
 
 const trendLabel = computed(() => {
-  if (days.value.length < 8) return 'Nova jornada'
+  if (!hasTrendBaseline.value) return 'Nova jornada'
   if (trendDelta.value === 0) return 'Estável'
   return `${trendDelta.value > 0 ? '+' : ''}${trendDelta.value} p.p.`
 })
+
+type HabitStruggleStat = {
+  id: string
+  name: string
+  emoji: string
+  color?: string
+  due: number
+  done: number
+  rate: number
+}
+
+/** Hábitos com menor taxa no período filtrado (mín. 2 oportunidades). */
+const strugglingHabits = computed((): HabitStruggleStat[] => {
+  const map = new Map<string, HabitStruggleStat>()
+
+  for (const day of visibleDays.value) {
+    for (const item of day.habits) {
+      if (item.skipped) continue
+
+      let row = map.get(item.habit.id)
+      if (!row) {
+        row = {
+          id: item.habit.id,
+          name: item.habit.name,
+          emoji: item.habit.emoji,
+          color: item.habit.color,
+          due: 0,
+          done: 0,
+          rate: 0,
+        }
+        map.set(item.habit.id, row)
+      }
+
+      row.due++
+      if (isHabitGoalMet(item)) row.done++
+    }
+  }
+
+  return [...map.values()]
+    .map(row => ({
+      ...row,
+      rate: row.due ? Math.round((row.done / row.due) * 100) : 0,
+    }))
+    .filter(row => row.due >= 2 && row.rate < 100)
+    .sort((a, b) => a.rate - b.rate || b.due - a.due)
+    .slice(0, 3)
+})
+
+function habitAccent(colorId?: string) {
+  return getHabitColor(colorId)
+}
 
 function weekdayLabel(date: string) {
   return new Date(`${date}T12:00:00`)
@@ -208,6 +278,53 @@ function showMore() {
         </div>
       </section>
 
+      <section v-if="strugglingHabits.length">
+        <AkSectionHeader title="Mais difíceis">
+          <template #action>
+            <span class="section-value section-value--muted">neste período</span>
+          </template>
+        </AkSectionHeader>
+        <p class="struggle-intro">
+          Hábitos com menor taxa de conclusão — bons candidatos a um ajuste de meta ou horário.
+        </p>
+        <AkList>
+          <AkListRow
+            v-for="(habit, index) in strugglingHabits"
+            :key="habit.id"
+            padding="md"
+            :divider="index < strugglingHabits.length - 1"
+          >
+            <template #leading>
+              <div
+                class="struggle-emoji"
+                :style="{ backgroundColor: habitAccent(habit.color).light }"
+              >
+                {{ habit.emoji }}
+              </div>
+            </template>
+
+            {{ habit.name }}
+
+            <template #subtitle>
+              {{ habit.done }} de {{ habit.due }}
+              {{ habit.due === 1 ? 'oportunidade' : 'oportunidades' }}
+            </template>
+
+            <template #trailing>
+              <span
+                class="struggle-rate"
+                :class="{
+                  'struggle-rate--low': habit.rate < 40,
+                  'struggle-rate--mid': habit.rate >= 40 && habit.rate < 70,
+                }"
+              >
+                {{ habit.rate }}%
+              </span>
+            </template>
+          </AkListRow>
+        </AkList>
+      </section>
+
       <section>
         <AkSectionHeader :title="`Dia a dia · ${visibleDays.length} dias`" />
         <AkList class="history-timeline">
@@ -350,6 +467,43 @@ function showMore() {
   color: var(--accent);
   font-size: 12px;
   font-weight: 700;
+}
+
+.section-value--muted {
+  color: var(--text-tertiary);
+  font-weight: 650;
+}
+
+.struggle-intro {
+  margin: calc(var(--space-2) * -1) 0 var(--space-3);
+  color: var(--text-secondary);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.struggle-emoji {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: grid;
+  place-items: center;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.struggle-rate {
+  font-size: 15px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-secondary);
+}
+
+.struggle-rate--mid {
+  color: var(--warning);
+}
+
+.struggle-rate--low {
+  color: var(--danger);
 }
 
 .week-strip {
