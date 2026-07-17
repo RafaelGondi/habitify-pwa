@@ -1784,7 +1784,7 @@ packages:
     resolution: {integrity: sha512-oOAWABowe8EAbMyWKM0tYDKi8Yaox52D+HWZhAIJqQXbqe0xI/GV7FhLWqlEKreMkfDjshR5FKgi3mnle0h6Eg==}
 
   '@rafael_dias/akoma@0.7.6':
-    resolution: {integrity: sha512-nw1sgstoUHSLrtAQ16sT4bL1THcXtbGdx5MvAqKGA6Wz261Luhv+FMoLX6C8piaEcJ8ODn8DDOZyZkS7wRN2sg==, tarball: https://registry.npmjs.org/@rafael_dias/akoma/-/akoma-0.7.6.tgz}
+    resolution: {integrity: sha512-nw1sgstoUHSLrtAQ16sT4bL1THcXtbGdx5MvAqKGA6Wz261Luhv+FMoLX6C8piaEcJ8ODn8DDOZyZkS7wRN2sg==}
     peerDependencies:
       '@sysvale/cuida-icons': ^1.18.0
       vue: ^3.5.0
