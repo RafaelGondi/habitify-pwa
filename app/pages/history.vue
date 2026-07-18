@@ -4,7 +4,7 @@ import { getHabitColor } from '~/utils/colors'
 
 type HistoryRange = 7 | 30 | 'all'
 
-const { days, hasMore, loadMore } = useHistoryDays()
+const { days, loadMore, ensureLoadedForDate, earliestDate } = useHistoryDays()
 const range = ref<HistoryRange>(30)
 
 const visibleDays = computed(() =>
@@ -151,6 +151,10 @@ function dayRateStyle(day: DayRecord) {
 function showMore() {
   loadMore()
   range.value = 'all'
+}
+
+function onCalendarEnsureDate(dateStr: string) {
+  ensureLoadedForDate(dateStr)
 }
 </script>
 
@@ -326,25 +330,12 @@ function showMore() {
       </section>
 
       <section>
-        <AkSectionHeader :title="`Dia a dia · ${visibleDays.length} dias`" />
-        <AkList class="history-timeline">
-          <HistoryDayBlock
-            v-for="(day, index) in visibleDays"
-            :key="day.date"
-            :day="day"
-            :divider="index < visibleDays.length - 1"
-          />
-        </AkList>
-
-        <AkButton
-          v-if="range === 'all' && hasMore"
-          class="load-more"
-          variant="ghost"
-          block
-          @click="showMore"
-        >
-          Ver mais 30 dias
-        </AkButton>
+        <AkSectionHeader title="Calendário" />
+        <HistoryCalendar
+          :days="days"
+          :earliest-date="earliestDate"
+          @ensure-date="onCalendarEnsureDate"
+        />
       </section>
     </div>
 
@@ -545,14 +536,6 @@ function showMore() {
 .week-day__mark--complete {
   background: var(--accent);
   color: var(--accent-contrast);
-}
-
-.history-timeline {
-  overflow: visible;
-}
-
-.load-more {
-  margin-top: var(--space-3);
 }
 
 .empty-wrap {

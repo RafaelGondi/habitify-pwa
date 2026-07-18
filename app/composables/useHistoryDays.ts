@@ -2,7 +2,23 @@ import type { DayRecord, HabitWithStatus } from '~/types'
 
 export function useHistoryDays() {
   const { data } = useStorage()
-  const visibleDays = ref(30)
+  const visibleDays = ref(60)
+
+  const earliestDate = computed(() => {
+    const allHabits = data.value.habits
+    if (!allHabits.length) return null
+    const earliestMs = Math.min(...allHabits.map(h => new Date(h.createdAt).getTime()))
+    const date = new Date(earliestMs)
+    date.setHours(0, 0, 0, 0)
+    return date
+  })
+
+  const totalSpanDays = computed(() => {
+    if (!earliestDate.value) return 0
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    return Math.ceil((today.getTime() - earliestDate.value.getTime()) / 86400000) + 1
+  })
 
   const days = computed((): DayRecord[] => {
     const allHabits = data.value.habits
@@ -11,16 +27,10 @@ export function useHistoryDays() {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
 
-    const earliestMs = Math.min(...allHabits.map(h => new Date(h.createdAt).getTime()))
-    const earliestDate = new Date(earliestMs)
-    earliestDate.setHours(0, 0, 0, 0)
-
-    const totalDays = Math.ceil((today.getTime() - earliestDate.getTime()) / 86400000)
-    const limit = Math.min(visibleDays.value, totalDays)
-
+    const limit = Math.min(visibleDays.value, totalSpanDays.value)
     const result: DayRecord[] = []
 
-    for (let i = 1; i <= limit; i++) {
+    for (let i = 0; i < limit; i++) {
       const date = new Date(today)
       date.setDate(today.getDate() - i)
       const dateStr = toDateString(date)
@@ -73,7 +83,6 @@ export function useHistoryDays() {
         }
       })
 
-      // Exclude skipped from rate (same rule as today view)
       const activeHabits = habits.filter(h => !h.skipped)
       const completionRate = activeHabits.length
         ? activeHabits.filter(h => isHabitGoalMet(h)).length / activeHabits.length
@@ -85,21 +94,23 @@ export function useHistoryDays() {
     return result
   })
 
-  const hasMore = computed(() => {
-    const allHabits = data.value.habits
-    if (!allHabits.length) return false
-    const today = new Date()
-    today.setHours(0, 0, 0, 0)
-    const earliestMs = Math.min(...allHabits.map(h => new Date(h.createdAt).getTime()))
-    const earliestDate = new Date(earliestMs)
-    earliestDate.setHours(0, 0, 0, 0)
-    const totalDays = Math.ceil((today.getTime() - earliestDate.getTime()) / 86400000)
-    return visibleDays.value < totalDays
-  })
+  const hasMore = computed(() => visibleDays.value < totalSpanDays.value)
 
   function loadMore() {
     visibleDays.value += 30
   }
 
-  return { days, hasMore, loadMore }
+  /** Garante que o histórico cubra até a data (para navegar meses no calendário). */
+  function ensureLoadedForDate(dateStr: string) {
+    const today = new Date()
+    today.setHours(0, 0, 0, 0)
+    const target = new Date(`${dateStr}T12:00:00`)
+    target.setHours(0, 0, 0, 0)
+    const daysNeeded = Math.ceil((today.getTime() - target.getTime()) / 86400000) + 1
+    if (daysNeeded > visibleDays.value) {
+      visibleDays.value = Math.min(daysNeeded + 7, Math.max(daysNeeded, totalSpanDays.value))
+    }
+  }
+
+  return { days, hasMore, loadMore, ensureLoadedForDate, earliestDate, totalSpanDays }
 }
