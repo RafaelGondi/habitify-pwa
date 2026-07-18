@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DayRecord } from '~/types'
+import { completionShade } from '~/utils/completionShade'
 
 const props = defineProps<{
   day: DayRecord
@@ -11,6 +12,17 @@ const isExpanded = ref(props.defaultExpanded ?? false)
 const activeHabits = computed(() => props.day.habits.filter(h => !h.skipped))
 const completedCount = computed(() => activeHabits.value.filter(h => isHabitGoalMet(h)).length)
 const pct = computed(() => Math.round(props.day.completionRate * 100))
+
+const ringShadeVar = computed(() => {
+  switch (completionShade(props.day.completionRate)) {
+    case 'lighter': return 'var(--accent-lighter)'
+    case 'light': return 'var(--accent-light)'
+    case 'base': return 'var(--accent)'
+    case 'dark': return 'var(--accent-dark)'
+    case 'darker': return 'var(--accent-darker)'
+    default: return 'var(--bg-muted)'
+  }
+})
 
 const dateParts = computed(() => {
   const date = new Date(`${props.day.date}T12:00:00`)
@@ -63,7 +75,10 @@ const statusLabel = computed(() => {
       <span class="history-day__progress">
         <span
           class="history-day__ring"
-          :style="{ '--progress': `${pct * 3.6}deg` }"
+          :style="{
+            '--progress': `${pct * 3.6}deg`,
+            '--ring-accent': ringShadeVar,
+          }"
           aria-hidden="true"
         >
           <span>{{ pct }}</span>
@@ -221,7 +236,7 @@ const statusLabel = computed(() => {
   border-radius: var(--radius-full);
   display: grid;
   place-items: center;
-  background: conic-gradient(var(--accent) var(--progress), var(--bg-muted) 0);
+  background: conic-gradient(var(--ring-accent, var(--accent)) var(--progress), var(--bg-muted) 0);
   position: relative;
 }
 

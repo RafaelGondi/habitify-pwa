@@ -1,12 +1,37 @@
 /* Habitify — layout shell only. Visual language lives in @rafael_dias/akoma tokens. */
 
 /*
- * Akoma 0.8 exposes --accent-light as a livelier chromatic step.
- * Use it as the primary brand accent (buttons, tabs, checks, links).
+ * Completion indicators use Akoma 0.8.3's five chromatic shades:
+ * --accent-lighter → --accent-light → --accent → --accent-dark → --accent-darker
  */
-:root {
-  --accent: var(--accent-light);
-  --accent-hover: var(--accent-dark);
+.completion-shade--none {
+  background: var(--bg-muted);
+  color: var(--text-tertiary);
+}
+
+.completion-shade--lighter {
+  background: var(--accent-lighter);
+  color: var(--text);
+}
+
+.completion-shade--light {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.completion-shade--base {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.completion-shade--dark {
+  background: var(--accent-dark);
+  color: var(--accent-contrast);
+}
+
+.completion-shade--darker {
+  background: var(--accent-darker);
+  color: var(--accent-contrast);
 }
 
 .app-root {
@@ -491,13 +516,19 @@ button.check-toggle::after {
   border-radius: 3px;
 }
 
-.heatmap-cell--done { background: var(--accent); }
+.heatmap-cell--done { background: var(--accent-darker); }
 .heatmap-cell--missed {
   background: var(--bg-muted);
   box-shadow: inset 0 0 0 1px var(--border-strong);
 }
-.heatmap-cell--idle { background: color-mix(in srgb, var(--bg-muted) 55%, transparent); }
+.heatmap-cell--idle { background: var(--accent-soft); }
 .heatmap-cell--empty { background: transparent; }
+
+.heatmap-cell--lighter { background: var(--accent-lighter); }
+.heatmap-cell--light { background: var(--accent-light); }
+.heatmap-cell--base { background: var(--accent); }
+.heatmap-cell--dark { background: var(--accent-dark); }
+.heatmap-cell--darker { background: var(--accent-darker); }
 
 .legend-row {
   display: flex;

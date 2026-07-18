@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { DayRecord } from '~/types'
+import { completionShade, completionShadeClass } from '~/utils/completionShade'
 
 const props = defineProps<{
   days: DayRecord[]
@@ -106,10 +107,9 @@ function buildMonthCells(year: number, month: number): CalendarCell[] {
   return cells
 }
 
-function cellStyle(cell: CalendarCell) {
-  if (!cell.inMonth || cell.isFuture || !cell.record) return undefined
-  const rate = Math.max(14, Math.round(cell.record.completionRate * 100))
-  return { '--day-rate': `${rate}%` }
+function cellShadeClass(cell: CalendarCell) {
+  if (!cell.inMonth || cell.isFuture || !cell.record) return ''
+  return completionShadeClass(completionShade(cell.record.completionRate))
 }
 
 function selectDay(cell: CalendarCell) {
@@ -231,16 +231,16 @@ watch(
               :key="`${currentMonth.key}-${cell.dateStr}`"
               type="button"
               class="history-cal__cell"
-              :class="{
-                'history-cal__cell--out': !cell.inMonth,
-                'history-cal__cell--future': cell.isFuture,
-                'history-cal__cell--today': cell.isToday,
-                'history-cal__cell--selected': selectedDate === cell.dateStr,
-                'history-cal__cell--done': cell.record && cell.record.completionRate === 1,
-                'history-cal__cell--partial': cell.record && cell.record.completionRate > 0 && cell.record.completionRate < 1,
-                'history-cal__cell--missed': cell.record && cell.record.completionRate === 0,
-              }"
-              :style="cellStyle(cell)"
+              :class="[
+                cellShadeClass(cell),
+                {
+                  'history-cal__cell--out': !cell.inMonth,
+                  'history-cal__cell--future': cell.isFuture,
+                  'history-cal__cell--today': cell.isToday,
+                  'history-cal__cell--selected': selectedDate === cell.dateStr,
+                  'history-cal__cell--empty': cell.inMonth && !cell.isFuture && !cell.record,
+                },
+              ]"
               :disabled="!cell.inMonth || cell.isFuture"
               :aria-label="cell.inMonth ? `${cell.dateStr}${cell.record ? `, ${Math.round(cell.record.completionRate * 100)}%` : ''}` : undefined"
               :aria-pressed="selectedDate === cell.dateStr"
@@ -253,10 +253,16 @@ watch(
       </Transition>
     </div>
 
-    <div class="history-cal__legend">
-      <span><i class="swatch swatch--missed" />0%</span>
-      <span><i class="swatch swatch--partial" />Parcial</span>
-      <span><i class="swatch swatch--done" />100%</span>
+    <div
+      class="history-cal__legend"
+      aria-label="Escala de completude"
+    >
+      <span><i class="swatch completion-shade--none" />0</span>
+      <span><i class="swatch completion-shade--lighter" /></span>
+      <span><i class="swatch completion-shade--light" /></span>
+      <span><i class="swatch completion-shade--base" /></span>
+      <span><i class="swatch completion-shade--dark" /></span>
+      <span><i class="swatch completion-shade--darker" />100</span>
     </div>
 
     <div
@@ -382,23 +388,13 @@ watch(
   color: transparent;
 }
 
-.history-cal__cell--future {
-  opacity: 0.38;
-}
-
-.history-cal__cell--missed {
-  background: var(--bg-muted);
+.history-cal__cell--empty {
+  background: var(--bg-soft);
   color: var(--text-tertiary);
 }
 
-.history-cal__cell--partial {
-  background: color-mix(in srgb, var(--accent) var(--day-rate), var(--bg-muted));
-  color: var(--text);
-}
-
-.history-cal__cell--done {
-  background: var(--accent);
-  color: var(--accent-contrast);
+.history-cal__cell--future {
+  opacity: 0.38;
 }
 
 .history-cal__cell--today:not(.history-cal__cell--out) {
@@ -416,28 +412,26 @@ watch(
 
 .history-cal__legend {
   display: flex;
+  align-items: center;
   justify-content: center;
-  gap: var(--space-4);
+  gap: 5px;
   color: var(--text-tertiary);
   font-size: 11px;
+  font-variant-numeric: tabular-nums;
 }
 
 .history-cal__legend span {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 4px;
 }
 
 .swatch {
-  width: 10px;
-  height: 10px;
+  width: 12px;
+  height: 12px;
   border-radius: 3px;
   display: inline-block;
 }
-
-.swatch--missed { background: var(--bg-muted); }
-.swatch--partial { background: color-mix(in srgb, var(--accent) 45%, var(--bg-muted)); }
-.swatch--done { background: var(--accent); }
 
 .history-cal__detail {
   margin-top: var(--space-2);

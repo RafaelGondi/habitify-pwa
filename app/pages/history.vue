@@ -10,8 +10,6 @@ const range = ref<HistoryRange>(30)
 const visibleDays = computed(() =>
   range.value === 'all' ? days.value : days.value.slice(0, range.value)
 )
-const weekDays = computed(() => [...days.value.slice(0, 7)].reverse())
-
 function dayTotals(day: DayRecord) {
   const active = day.habits.filter(item => !item.skipped)
   return {
@@ -46,9 +44,6 @@ const consistency = computed(() =>
     ? Math.round((periodTotals.value.done / periodTotals.value.total) * 100)
     : 0
 )
-
-/** Strip “últimos 7 dias” — independente do filtro de consistência. */
-const currentWeekRate = computed(() => rateFor(days.value.slice(0, 7)))
 
 /**
  * Tendência amarrada ao filtro: metade recente do período vs. metade anterior.
@@ -131,21 +126,6 @@ const strugglingHabits = computed((): HabitStruggleStat[] => {
 
 function habitAccent(colorId?: string) {
   return getHabitColor(colorId)
-}
-
-function weekdayLabel(date: string) {
-  return new Date(`${date}T12:00:00`)
-    .toLocaleDateString('pt-BR', { weekday: 'short' })
-    .replace('.', '')
-    .slice(0, 3)
-}
-
-function dayNumber(date: string) {
-  return new Date(`${date}T12:00:00`).getDate()
-}
-
-function dayRateStyle(day: DayRecord) {
-  return { '--day-rate': `${Math.max(12, Math.round(day.completionRate * 100))}%` }
 }
 
 function showMore() {
@@ -242,42 +222,6 @@ function onCalendarEnsureDate(dateStr: string) {
           <div class="history-metric">
             <strong>{{ visibleDays.length }}</strong>
             <span>dias analisados</span>
-          </div>
-        </div>
-      </section>
-
-      <section v-if="weekDays.length">
-        <AkSectionHeader title="Últimos 7 dias">
-          <template #action>
-            <span class="section-value">{{ currentWeekRate }}%</span>
-          </template>
-        </AkSectionHeader>
-
-        <div
-          class="week-strip"
-          role="list"
-          aria-label="Consistência nos últimos sete dias"
-        >
-          <div
-            v-for="day in weekDays"
-            :key="day.date"
-            class="week-day"
-            role="listitem"
-            :title="`${formatDateLabel(day.date)}: ${Math.round(day.completionRate * 100)}%`"
-          >
-            <span class="week-day__label">{{ weekdayLabel(day.date) }}</span>
-            <div
-              class="week-day__mark"
-              :class="{ 'week-day__mark--complete': day.completionRate === 1 }"
-              :style="dayRateStyle(day)"
-            >
-              <AppIcon
-                v-if="day.completionRate === 1"
-                name="lucide:check"
-                :size="14"
-              />
-              <span v-else>{{ dayNumber(day.date) }}</span>
-            </div>
           </div>
         </div>
       </section>
@@ -495,47 +439,6 @@ function onCalendarEnsureDate(dateStr: string) {
 
 .struggle-rate--low {
   color: var(--danger);
-}
-
-.week-strip {
-  display: grid;
-  grid-template-columns: repeat(7, minmax(0, 1fr));
-  gap: var(--space-2);
-}
-
-.week-day {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.week-day__label {
-  color: var(--text-tertiary);
-  font-size: 10px;
-  font-weight: 650;
-  text-transform: uppercase;
-}
-
-.week-day__mark {
-  width: min(9vw, 38px);
-  height: min(9vw, 38px);
-  min-width: 32px;
-  min-height: 32px;
-  border-radius: var(--radius-full);
-  display: grid;
-  place-items: center;
-  background: color-mix(in srgb, var(--accent) var(--day-rate), var(--bg-muted));
-  color: var(--text-secondary);
-  font-size: 12px;
-  font-weight: 650;
-  font-variant-numeric: tabular-nums;
-}
-
-.week-day__mark--complete {
-  background: var(--accent);
-  color: var(--accent-contrast);
 }
 
 .empty-wrap {
