@@ -1,5 +1,14 @@
 /* Habitify — layout shell only. Visual language lives in @rafael_dias/akoma tokens. */
 
+/*
+ * Akoma 0.8 exposes --accent-light as a livelier chromatic step.
+ * Use it as the primary brand accent (buttons, tabs, checks, links).
+ */
+:root {
+  --accent: var(--accent-light);
+  --accent-hover: var(--accent-dark);
+}
+
 .app-root {
   position: relative;
   display: flex;
