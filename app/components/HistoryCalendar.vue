@@ -30,9 +30,9 @@ type CalendarMonth = {
 }
 
 const todayStr = toDateString(new Date())
-const trackRef = ref<HTMLElement | null>(null)
 const monthIndex = ref(0)
 const selectedDate = ref<string | null>(null)
+const slideDir = ref<'left' | 'right' | null>(null)
 
 const daysByDate = computed(() => {
   const map = new Map<string, DayRecord>()
@@ -117,34 +117,34 @@ function selectDay(cell: CalendarCell) {
   selectedDate.value = selectedDate.value === cell.dateStr ? null : cell.dateStr
 }
 
-function goToMonth(index: number) {
+function goToMonth(index: number, dir?: 'left' | 'right') {
   const next = Math.max(0, Math.min(months.value.length - 1, index))
+  if (next === monthIndex.value) return
+  slideDir.value = dir ?? (next > monthIndex.value ? 'left' : 'right')
   monthIndex.value = next
+  selectedDate.value = null
   const month = months.value[next]
-  if (month) {
-    emit('ensureDate', `${month.key}-01`)
-    scrollToMonth(next, true)
-  }
+  if (month) emit('ensureDate', `${month.key}-01`)
 }
 
-function scrollToMonth(index: number, smooth = false) {
-  const track = trackRef.value
-  if (!track) return
-  const width = track.clientWidth
-  track.scrollTo({
-    left: width * index,
-    behavior: smooth ? 'smooth' : 'auto',
-  })
+let touchStartX = 0
+let touchStartY = 0
+
+function onTouchStart(e: TouchEvent) {
+  const touch = e.touches[0]
+  if (!touch) return
+  touchStartX = touch.clientX
+  touchStartY = touch.clientY
 }
 
-function onTrackScroll() {
-  const track = trackRef.value
-  if (!track?.clientWidth) return
-  const index = Math.round(track.scrollLeft / track.clientWidth)
-  if (index !== monthIndex.value && index >= 0 && index < months.value.length) {
-    monthIndex.value = index
-    const month = months.value[index]
-    if (month) emit('ensureDate', `${month.key}-01`)
+function onTouchEnd(e: TouchEvent) {
+  const touch = e.changedTouches[0]
+  if (!touch) return
+  const dx = touchStartX - touch.clientX
+  const dy = Math.abs(touchStartY - touch.clientY)
+  // Só troca o mês se o gesto for claramente horizontal — senão o scroll da página segue.
+  if (Math.abs(dx) > 56 && Math.abs(dx) > dy * 1.25) {
+    goToMonth(monthIndex.value + (dx > 0 ? 1 : -1), dx > 0 ? 'left' : 'right')
   }
 }
 
@@ -153,7 +153,6 @@ watch(
   (list) => {
     if (!list.length) return
     monthIndex.value = list.length - 1
-    nextTick(() => scrollToMonth(list.length - 1))
   },
   { immediate: true },
 )
@@ -167,7 +166,7 @@ watch(
         variant="ghost"
         size="sm"
         :disabled="monthIndex <= 0"
-        @click="goToMonth(monthIndex - 1)"
+        @click="goToMonth(monthIndex - 1, 'right')"
       >
         <AppIcon
           name="lucide:chevron-left"
@@ -180,7 +179,7 @@ watch(
           {{ currentMonth?.label ?? 'Calendário' }}
         </h2>
         <p class="history-cal__hint">
-          Deslize para mudar o mês
+          Deslize na horizontal para mudar o mês
         </p>
       </div>
 
@@ -189,7 +188,7 @@ watch(
         variant="ghost"
         size="sm"
         :disabled="monthIndex >= months.length - 1"
-        @click="goToMonth(monthIndex + 1)"
+        @click="goToMonth(monthIndex + 1, 'left')"
       >
         <AppIcon
           name="lucide:chevron-right"
@@ -199,55 +198,59 @@ watch(
     </div>
 
     <div
-      ref="trackRef"
-      class="history-cal__track"
-      aria-label="Calendário de progresso"
-      @scroll.passive="onTrackScroll"
+      class="history-cal__stage"
+      @touchstart.passive="onTouchStart"
+      @touchend.passive="onTouchEnd"
     >
-      <div
-        v-for="month in months"
-        :key="month.key"
-        class="history-cal__month"
+      <Transition
+        :name="slideDir === 'right' ? 'cal-right' : 'cal-left'"
+        mode="out-in"
       >
         <div
-          class="history-cal__weekdays"
-          aria-hidden="true"
+          v-if="currentMonth"
+          :key="currentMonth.key"
+          class="history-cal__month"
         >
-          <span
-            v-for="(label, index) in WEEKDAYS"
-            :key="`${month.key}-${index}`"
-          >{{ label }}</span>
-        </div>
-
-        <div
-          class="history-cal__grid"
-          role="grid"
-          :aria-label="month.label"
-        >
-          <button
-            v-for="cell in month.cells"
-            :key="`${month.key}-${cell.dateStr}`"
-            type="button"
-            class="history-cal__cell"
-            :class="{
-              'history-cal__cell--out': !cell.inMonth,
-              'history-cal__cell--future': cell.isFuture,
-              'history-cal__cell--today': cell.isToday,
-              'history-cal__cell--selected': selectedDate === cell.dateStr,
-              'history-cal__cell--done': cell.record && cell.record.completionRate === 1,
-              'history-cal__cell--partial': cell.record && cell.record.completionRate > 0 && cell.record.completionRate < 1,
-              'history-cal__cell--missed': cell.record && cell.record.completionRate === 0,
-            }"
-            :style="cellStyle(cell)"
-            :disabled="!cell.inMonth || cell.isFuture"
-            :aria-label="cell.inMonth ? `${cell.dateStr}${cell.record ? `, ${Math.round(cell.record.completionRate * 100)}%` : ''}` : undefined"
-            :aria-pressed="selectedDate === cell.dateStr"
-            @click="selectDay(cell)"
+          <div
+            class="history-cal__weekdays"
+            aria-hidden="true"
           >
-            <span>{{ cell.inMonth ? cell.day : '' }}</span>
-          </button>
+            <span
+              v-for="(label, index) in WEEKDAYS"
+              :key="`${currentMonth.key}-${index}`"
+            >{{ label }}</span>
+          </div>
+
+          <div
+            class="history-cal__grid"
+            role="grid"
+            :aria-label="currentMonth.label"
+          >
+            <button
+              v-for="cell in currentMonth.cells"
+              :key="`${currentMonth.key}-${cell.dateStr}`"
+              type="button"
+              class="history-cal__cell"
+              :class="{
+                'history-cal__cell--out': !cell.inMonth,
+                'history-cal__cell--future': cell.isFuture,
+                'history-cal__cell--today': cell.isToday,
+                'history-cal__cell--selected': selectedDate === cell.dateStr,
+                'history-cal__cell--done': cell.record && cell.record.completionRate === 1,
+                'history-cal__cell--partial': cell.record && cell.record.completionRate > 0 && cell.record.completionRate < 1,
+                'history-cal__cell--missed': cell.record && cell.record.completionRate === 0,
+              }"
+              :style="cellStyle(cell)"
+              :disabled="!cell.inMonth || cell.isFuture"
+              :aria-label="cell.inMonth ? `${cell.dateStr}${cell.record ? `, ${Math.round(cell.record.completionRate * 100)}%` : ''}` : undefined"
+              :aria-pressed="selectedDate === cell.dateStr"
+              @click="selectDay(cell)"
+            >
+              <span>{{ cell.inMonth ? cell.day : '' }}</span>
+            </button>
+          </div>
         </div>
-      </div>
+      </Transition>
     </div>
 
     <div class="history-cal__legend">
@@ -324,26 +327,14 @@ watch(
   font-size: 11px;
 }
 
-.history-cal__track {
-  display: flex;
-  overflow-x: auto;
-  scroll-snap-type: x mandatory;
-  scrollbar-width: none;
-  -webkit-overflow-scrolling: touch;
-  touch-action: pan-x;
-  margin-inline: calc(var(--page-pad-x) * -1);
-  padding-inline: var(--page-pad-x);
-}
-
-.history-cal__track::-webkit-scrollbar {
-  display: none;
+.history-cal__stage {
+  position: relative;
+  overflow: hidden;
+  width: 100%;
 }
 
 .history-cal__month {
-  flex: 0 0 100%;
   width: 100%;
-  scroll-snap-align: center;
-  scroll-snap-stop: always;
 }
 
 .history-cal__weekdays {
@@ -480,8 +471,41 @@ watch(
   text-align: center;
 }
 
+.cal-left-enter-active,
+.cal-left-leave-active,
+.cal-right-enter-active,
+.cal-right-leave-active {
+  transition:
+    opacity 220ms var(--ease-smooth),
+    transform 220ms var(--ease-out-expo);
+}
+
+.cal-left-enter-from {
+  opacity: 0;
+  transform: translateX(18px);
+}
+
+.cal-left-leave-to {
+  opacity: 0;
+  transform: translateX(-18px);
+}
+
+.cal-right-enter-from {
+  opacity: 0;
+  transform: translateX(-18px);
+}
+
+.cal-right-leave-to {
+  opacity: 0;
+  transform: translateX(18px);
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .history-cal__cell {
+  .history-cal__cell,
+  .cal-left-enter-active,
+  .cal-left-leave-active,
+  .cal-right-enter-active,
+  .cal-right-leave-active {
     transition: none;
   }
 }
