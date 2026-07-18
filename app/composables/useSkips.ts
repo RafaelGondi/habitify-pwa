@@ -31,14 +31,24 @@ export function useSkips() {
   return { skipHabit, unskipHabit, isSkipped }
 }
 
-export function canSkipWeeklyX(dateStr: string, weeklyDone: number, timesPerWeek: number): boolean {
-  const remainingReps = timesPerWeek - weeklyDone
+/** Skip allowed when remaining calendar days in the period exceed remaining reps needed. */
+export function canSkipPeriodQuota(
+  dateStr: string,
+  periodEnd: string,
+  done: number,
+  total: number,
+): boolean {
+  const remainingReps = total - done
   if (remainingReps <= 0) return false
 
-  const date = new Date(dateStr + 'T12:00:00')
-  const dow = date.getDay()
-  const daysToSunday = dow === 0 ? 0 : 7 - dow
-  const remainingDays = daysToSunday + 1
+  const start = new Date(dateStr + 'T12:00:00')
+  const end = new Date(periodEnd + 'T12:00:00')
+  const remainingDays = Math.floor((end.getTime() - start.getTime()) / 86400000) + 1
 
   return remainingDays > remainingReps
+}
+
+/** @deprecated Prefer canSkipPeriodQuota */
+export function canSkipWeeklyX(dateStr: string, weeklyDone: number, timesPerWeek: number): boolean {
+  return canSkipPeriodQuota(dateStr, getWeekEnd(dateStr), weeklyDone, timesPerWeek)
 }

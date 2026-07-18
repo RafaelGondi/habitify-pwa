@@ -1,12 +1,23 @@
 export type WeekDay = 0 | 1 | 2 | 3 | 4 | 5 | 6
 export type HabitPeriod = 'early_morning' | 'morning' | 'afternoon' | 'night' | 'late_night'
 
-export type RecurrenceType = 'daily' | 'weekdays' | 'weekends' | 'custom' | 'weekly_x'
+export type RecurrenceType =
+  | 'daily'
+  | 'weekdays'
+  | 'weekends'
+  | 'custom'
+  | 'weekly_x'
+  | 'biweekly_x'
+  | 'monthly_x'
+
+export type QuotaPeriodUnit = 'week' | 'biweek' | 'month'
 
 export interface HabitRecurrence {
   type: RecurrenceType
   days?: WeekDay[]
   timesPerWeek?: number
+  timesPerBiweek?: number
+  timesPerMonth?: number
 }
 
 export interface Habit {
@@ -43,11 +54,17 @@ export interface AppData {
   exportedAt?: string
 }
 
+export interface PeriodProgress {
+  done: number
+  total: number
+  unit: QuotaPeriodUnit
+}
+
 export interface HabitWithStatus {
   habit: Habit
   completed: boolean
   completionId?: string
-  weeklyProgress?: { done: number, total: number }
+  periodProgress?: PeriodProgress
   skipped?: boolean
   canSkip?: boolean
   note?: string

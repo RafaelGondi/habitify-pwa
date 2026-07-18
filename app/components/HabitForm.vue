@@ -41,6 +41,8 @@ const RECURRENCE_OPTIONS: Array<{ value: RecurrenceType, label: string }> = [
   { value: 'weekdays', label: 'Dias úteis' },
   { value: 'weekends', label: 'Fim de semana' },
   { value: 'weekly_x', label: 'X vezes/semana' },
+  { value: 'biweekly_x', label: 'X vezes/quinzena' },
+  { value: 'monthly_x', label: 'X vezes/mês' },
   { value: 'custom', label: 'Personalizado' },
 ]
 
@@ -61,6 +63,8 @@ const periods = ref<HabitPeriod[]>(props.habit?.periods ?? [])
 const recurrenceType = ref<RecurrenceType>(props.habit?.recurrence.type ?? 'daily')
 const customDays = ref<WeekDay[]>([...(props.habit?.recurrence.days ?? [])])
 const timesPerWeek = ref<number>(props.habit?.recurrence.timesPerWeek ?? 3)
+const timesPerBiweek = ref<number>(props.habit?.recurrence.timesPerBiweek ?? 1)
+const timesPerMonth = ref<number>(props.habit?.recurrence.timesPerMonth ?? 1)
 const startDate = ref<string>(
   props.habit?.createdAt
     ? props.habit.createdAt.slice(0, 10)
@@ -92,6 +96,8 @@ function handleSubmit() {
     type: recurrenceType.value,
     ...(recurrenceType.value === 'custom' ? { days: customDays.value } : {}),
     ...(recurrenceType.value === 'weekly_x' ? { timesPerWeek: timesPerWeek.value } : {}),
+    ...(recurrenceType.value === 'biweekly_x' ? { timesPerBiweek: timesPerBiweek.value } : {}),
+    ...(recurrenceType.value === 'monthly_x' ? { timesPerMonth: timesPerMonth.value } : {}),
   }
 
   emit('submit', {
@@ -200,6 +206,69 @@ function handleSubmit() {
             size="sm"
             :disabled="timesPerWeek >= 7"
             @click="timesPerWeek = Math.min(7, timesPerWeek + 1)"
+          >
+            +
+          </AkButton>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="fade">
+      <div v-if="recurrenceType === 'biweekly_x'">
+        <p class="text-sm font-semibold" style="margin-bottom: 7px">Quantas vezes por quinzena?</p>
+        <p class="text-xs text-muted" style="margin-bottom: var(--space-2)">
+          Quinzena = dias 1–15 ou 16–fim do mês.
+        </p>
+        <div class="counter-row">
+          <AkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            :disabled="timesPerBiweek <= 1"
+            @click="timesPerBiweek = Math.max(1, timesPerBiweek - 1)"
+          >
+            −
+          </AkButton>
+          <div class="counter-value">
+            {{ timesPerBiweek }}
+            <span class="text-sm text-muted">{{ timesPerBiweek === 1 ? 'vez' : 'vezes' }}</span>
+          </div>
+          <AkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            :disabled="timesPerBiweek >= 8"
+            @click="timesPerBiweek = Math.min(8, timesPerBiweek + 1)"
+          >
+            +
+          </AkButton>
+        </div>
+      </div>
+    </Transition>
+
+    <Transition name="fade">
+      <div v-if="recurrenceType === 'monthly_x'">
+        <p class="text-sm font-semibold" style="margin-bottom: 7px">Quantas vezes por mês?</p>
+        <div class="counter-row">
+          <AkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            :disabled="timesPerMonth <= 1"
+            @click="timesPerMonth = Math.max(1, timesPerMonth - 1)"
+          >
+            −
+          </AkButton>
+          <div class="counter-value">
+            {{ timesPerMonth }}
+            <span class="text-sm text-muted">{{ timesPerMonth === 1 ? 'vez' : 'vezes' }}</span>
+          </div>
+          <AkButton
+            type="button"
+            variant="secondary"
+            size="sm"
+            :disabled="timesPerMonth >= 15"
+            @click="timesPerMonth = Math.min(15, timesPerMonth + 1)"
           >
             +
           </AkButton>

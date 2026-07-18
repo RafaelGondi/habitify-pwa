@@ -20,27 +20,27 @@ const isEditable = computed(() => !props.mode || props.mode === 'editable')
 const { getStreak } = useStreak()
 const streak = computed(() => getStreak(props.item.habit))
 const habitColor = computed(() => getHabitColor(props.item.habit.color))
-const weeklyProgress = computed(() => props.item.weeklyProgress)
+const periodProgress = computed(() => props.item.periodProgress)
 
-const weeklyBadgeVariant = computed(() => {
-  const p = weeklyProgress.value
+const periodBadgeVariant = computed(() => {
+  const p = periodProgress.value
   if (!p) return 'neutral' as const
   if (p.done > p.total) return 'success' as const
   if (p.done >= p.total) return 'accent' as const
   return 'neutral' as const
 })
 
-const weeklyBadgeLabel = computed(() => {
-  const p = weeklyProgress.value
+const periodBadgeLabel = computed(() => {
+  const p = periodProgress.value
   if (!p) return ''
   const suffix = p.done > p.total ? '+' : ''
-  return `${p.done}/${p.total}${suffix} sem.`
+  return `${p.done}/${p.total}${suffix} ${quotaUnitShortLabel(p.unit)}`
 })
 
 const isDimmed = computed(() => props.item.skipped)
 
 const showMeta = computed(() =>
-  (streak.value >= 1 || weeklyProgress.value || props.item.skipped) && props.mode !== 'future'
+  (streak.value >= 1 || periodProgress.value || props.item.skipped) && props.mode !== 'future'
 )
 
 function openDetail() {
@@ -90,9 +90,9 @@ function handleToggle(e: Event) {
       <div class="habit-row-meta">
         <span v-if="streak >= 1">🔥 {{ streak }} dia{{ streak !== 1 ? 's' : '' }}</span>
         <AkBadge
-          v-if="weeklyProgress"
-          :variant="weeklyBadgeVariant"
-          :label="weeklyBadgeLabel"
+          v-if="periodProgress"
+          :variant="periodBadgeVariant"
+          :label="periodBadgeLabel"
         />
         <span
           v-if="item.skipped"

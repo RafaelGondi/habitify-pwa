@@ -96,10 +96,11 @@ const statusLabel = computed(() => {
               {{ item.habit.name }}
             </span>
             <span
-              v-if="item.weeklyProgress"
+              v-if="item.periodProgress"
               class="history-habit__meta"
             >
-              {{ item.weeklyProgress.done }}/{{ item.weeklyProgress.total }} na semana
+              {{ item.periodProgress.done }}/{{ item.periodProgress.total }}
+              {{ quotaUnitLongLabel(item.periodProgress.unit) }}
             </span>
           </span>
 

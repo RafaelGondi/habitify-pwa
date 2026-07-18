@@ -41,26 +41,24 @@ export function useHistoryDays() {
 
       const completions = data.value.completions.filter(c => c.date === dateStr)
       const skipsForDate = (data.value.skips ?? []).filter(s => s.date === dateStr)
-      const weekStart = getWeekStart(dateStr)
 
       const habits: HabitWithStatus[] = relevantHabits.map((h) => {
         const completedToday = completions.some(c => c.habitId === h.id)
         const skipped = skipsForDate.some(s => s.habitId === h.id)
+        const period = getQuotaPeriod(h, dateStr)
 
-        if (h.recurrence.type === 'weekly_x') {
-          const total = h.recurrence.timesPerWeek ?? 1
-          // completions this week strictly before this date
-          const weekDoneBefore = data.value.completions.filter(
-            c => c.habitId === h.id && c.date >= weekStart && c.date < dateStr,
+        if (period) {
+          const doneBefore = data.value.completions.filter(
+            c => c.habitId === h.id && c.date >= period.start && c.date < dateStr,
           ).length
-          const weekDoneTotal = weekDoneBefore + (completedToday ? 1 : 0)
-          const couldSkip = canSkipWeeklyX(dateStr, weekDoneBefore, total)
+          const doneTotal = doneBefore + (completedToday ? 1 : 0)
+          const couldSkip = canSkipPeriodQuota(dateStr, period.end, doneBefore, period.total)
 
           return {
             habit: h,
             completed: completedToday,
             completionId: completions.find(c => c.habitId === h.id)?.id,
-            weeklyProgress: { done: weekDoneTotal, total },
+            periodProgress: { done: doneTotal, total: period.total, unit: period.unit },
             skipped,
             canSkip: couldSkip,
           }

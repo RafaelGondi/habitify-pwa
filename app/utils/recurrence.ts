@@ -1,4 +1,4 @@
-import type { Habit, RecurrenceType, WeekDay } from '~/types'
+import type { Habit, QuotaPeriodUnit, RecurrenceType, WeekDay } from '~/types'
 
 export function isHabitDueOn(habit: Habit, date: Date): boolean {
   const day = date.getDay() as WeekDay
@@ -7,8 +7,15 @@ export function isHabitDueOn(habit: Habit, date: Date): boolean {
     case 'weekdays': return day >= 1 && day <= 5
     case 'weekends': return day === 0 || day === 6
     case 'custom': return (habit.recurrence.days ?? []).includes(day)
-    case 'weekly_x': return true
+    case 'weekly_x':
+    case 'biweekly_x':
+    case 'monthly_x':
+      return true
   }
+}
+
+export function isQuotaRecurrence(type: RecurrenceType): boolean {
+  return type === 'weekly_x' || type === 'biweekly_x' || type === 'monthly_x'
 }
 
 export function getWeekStart(dateStr: string): string {
@@ -24,6 +31,87 @@ export function getWeekEnd(dateStr: string): string {
   const monday = new Date(start + 'T12:00:00')
   const sunday = new Date(monday.getTime() + 6 * 86400000)
   return toDateString(sunday)
+}
+
+/** 1ª quinzena: dias 1–15; 2ª: 16–fim do mês. */
+export function getBiweekBounds(dateStr: string): { start: string, end: string } {
+  const date = new Date(dateStr + 'T12:00:00')
+  const y = date.getFullYear()
+  const m = date.getMonth()
+  const day = date.getDate()
+
+  if (day <= 15) {
+    return {
+      start: toDateString(new Date(y, m, 1)),
+      end: toDateString(new Date(y, m, 15)),
+    }
+  }
+
+  return {
+    start: toDateString(new Date(y, m, 16)),
+    end: toDateString(new Date(y, m + 1, 0)),
+  }
+}
+
+export function getMonthBounds(dateStr: string): { start: string, end: string } {
+  const date = new Date(dateStr + 'T12:00:00')
+  const y = date.getFullYear()
+  const m = date.getMonth()
+  return {
+    start: toDateString(new Date(y, m, 1)),
+    end: toDateString(new Date(y, m + 1, 0)),
+  }
+}
+
+export function getQuotaPeriod(habit: Habit, dateStr: string): {
+  total: number
+  unit: QuotaPeriodUnit
+  start: string
+  end: string
+} | null {
+  switch (habit.recurrence.type) {
+    case 'weekly_x':
+      return {
+        total: habit.recurrence.timesPerWeek ?? 1,
+        unit: 'week',
+        start: getWeekStart(dateStr),
+        end: getWeekEnd(dateStr),
+      }
+    case 'biweekly_x': {
+      const bounds = getBiweekBounds(dateStr)
+      return {
+        total: habit.recurrence.timesPerBiweek ?? 1,
+        unit: 'biweek',
+        ...bounds,
+      }
+    }
+    case 'monthly_x': {
+      const bounds = getMonthBounds(dateStr)
+      return {
+        total: habit.recurrence.timesPerMonth ?? 1,
+        unit: 'month',
+        ...bounds,
+      }
+    }
+    default:
+      return null
+  }
+}
+
+export function quotaUnitShortLabel(unit: QuotaPeriodUnit): string {
+  switch (unit) {
+    case 'week': return 'sem.'
+    case 'biweek': return 'quin.'
+    case 'month': return 'mês'
+  }
+}
+
+export function quotaUnitLongLabel(unit: QuotaPeriodUnit): string {
+  switch (unit) {
+    case 'week': return 'na semana'
+    case 'biweek': return 'na quinzena'
+    case 'month': return 'no mês'
+  }
 }
 
 export function toDateString(date: Date): string {
@@ -66,6 +154,22 @@ export function recurrenceLabel(type: RecurrenceType): string {
     weekends: 'Fim de semana',
     custom: 'Personalizado',
     weekly_x: 'X vezes/semana',
+    biweekly_x: 'X vezes/quinzena',
+    monthly_x: 'X vezes/mês',
   }
   return labels[type]
+}
+
+export function formatRecurrenceSummary(habit: Habit): string {
+  const { recurrence } = habit
+  if (recurrence.type === 'weekly_x') {
+    return `${recurrence.timesPerWeek ?? 1}x por semana`
+  }
+  if (recurrence.type === 'biweekly_x') {
+    return `${recurrence.timesPerBiweek ?? 1}x por quinzena`
+  }
+  if (recurrence.type === 'monthly_x') {
+    return `${recurrence.timesPerMonth ?? 1}x por mês`
+  }
+  return recurrenceLabel(recurrence.type)
 }

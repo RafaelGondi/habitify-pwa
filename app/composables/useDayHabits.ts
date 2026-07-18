@@ -17,11 +17,6 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
   const dueHabits = computed((): HabitWithStatus[] => {
     const completions = data.value.completions.filter(c => c.date === dateStr.value)
     const skips = (data.value.skips ?? []).filter(s => s.date === dateStr.value)
-    const weekStart = getWeekStart(dateStr.value)
-    const weekEnd = getWeekEnd(dateStr.value)
-    const weekCompletions = data.value.completions.filter(
-      c => c.date >= weekStart && c.date <= weekEnd,
-    )
     const d = dateObj.value
     const target = new Date(dateStr.value + 'T00:00:00')
 
@@ -47,21 +42,27 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
         const completion = completions.find(c => c.habitId === h.id)
         const completedToday = !!completion
         const skipped = skips.some(s => s.habitId === h.id)
+        const period = getQuotaPeriod(h, dateStr.value)
 
-        if (h.recurrence.type === 'weekly_x') {
-          const total = h.recurrence.timesPerWeek ?? 1
-          const done = weekCompletions.filter(c => c.habitId === h.id).length
-          const allowSkip = !completedToday && !skipped && canSkipWeeklyX(dateStr.value, done, total)
+        if (period) {
+          const done = data.value.completions.filter(
+            c => c.habitId === h.id && c.date >= period.start && c.date <= period.end,
+          ).length
+          const allowSkip = !completedToday
+            && !skipped
+            && canSkipPeriodQuota(dateStr.value, period.end, done, period.total)
+
           return {
             habit: h,
             completed: completedToday,
             completionId: completion?.id,
             note: completion?.note,
-            weeklyProgress: { done, total },
+            periodProgress: { done, total: period.total, unit: period.unit },
             skipped,
             canSkip: allowSkip,
           }
         }
+
         return {
           habit: h,
           completed: completedToday,

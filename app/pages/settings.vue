@@ -76,11 +76,8 @@ const { $pwa } = useNuxtApp()
 const importInput = ref<HTMLInputElement | null>(null)
 
 function habitSubtitle(habit: Habit) {
-  const recurrence = habit.recurrence.type === 'weekly_x'
-    ? `${habit.recurrence.timesPerWeek}x por semana`
-    : recurrenceLabel(habit.recurrence.type)
   const periods = habit.periods?.length ? ` · ${getHabitPeriodsLabel(habit.periods)}` : ''
-  return recurrence + periods
+  return formatRecurrenceSummary(habit) + periods
 }
 </script>
 

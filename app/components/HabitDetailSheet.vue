@@ -26,7 +26,7 @@ function generateGrid(habit: Habit, completions: Completion[]): Cell[][] {
   const daysToMon = dow === 0 ? 6 : dow - 1
   const thisMon = new Date(today.getTime() - daysToMon * 86400000)
   const startMon = new Date(thisMon.getTime() - (WEEKS - 1) * 7 * 86400000)
-  const isWeeklyX = habit.recurrence.type === 'weekly_x'
+  const isQuota = isQuotaRecurrence(habit.recurrence.type)
 
   return Array.from({ length: WEEKS }, (_, w) =>
     Array.from({ length: 7 }, (_, d) => {
@@ -41,7 +41,7 @@ function generateGrid(habit: Habit, completions: Completion[]): Cell[][] {
 
       const completed = completions.some(c => c.habitId === habit.id && c.date === dateStr)
       if (completed) return { dateStr, status: 'completed' as CellStatus }
-      return { dateStr, status: isWeeklyX ? 'not-scheduled' : 'missed' }
+      return { dateStr, status: isQuota ? 'not-scheduled' : 'missed' }
     }),
   )
 }
@@ -155,7 +155,7 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
             <div class="legend-swatch heatmap-cell--done" />
             <span>Feito</span>
           </div>
-          <div v-if="habit.recurrence.type !== 'weekly_x'" class="legend-item">
+          <div v-if="!isQuotaRecurrence(habit.recurrence.type)" class="legend-item">
             <div class="legend-swatch heatmap-cell--missed" />
             <span>Não feito</span>
           </div>
