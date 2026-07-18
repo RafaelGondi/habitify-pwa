@@ -393,6 +393,37 @@ watch(
   color: var(--text-tertiary);
 }
 
+/* Scoped cell bg beats global .completion-shade--*; redeclare with higher specificity. */
+.history-cal__cell.completion-shade--none {
+  background: var(--bg-muted);
+  color: var(--text-tertiary);
+}
+
+.history-cal__cell.completion-shade--lighter {
+  background: var(--accent-lighter);
+  color: var(--text);
+}
+
+.history-cal__cell.completion-shade--light {
+  background: var(--accent-light);
+  color: var(--text);
+}
+
+.history-cal__cell.completion-shade--base {
+  background: var(--accent);
+  color: var(--accent-contrast);
+}
+
+.history-cal__cell.completion-shade--dark {
+  background: var(--accent-dark);
+  color: var(--accent-contrast);
+}
+
+.history-cal__cell.completion-shade--darker {
+  background: var(--accent-darker);
+  color: var(--accent-contrast);
+}
+
 .history-cal__cell--future {
   opacity: 0.38;
 }

@@ -3,7 +3,7 @@ import { applyAccentPalette, type AccentPalette } from '@rafael_dias/akoma'
 export type ThemeMode = 'light' | 'dark'
 
 const STORAGE_KEY = 'habitify-theme'
-const ACCENT: AccentPalette = 'teal'
+const ACCENT: AccentPalette = 'evergreen'
 
 const THEME_COLORS: Record<ThemeMode, string> = {
   light: '#f8f6f1',
