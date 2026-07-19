@@ -61,7 +61,10 @@ function handleToggle(e: Event) {
     class="habit-card-row"
     padding="md"
     :divider="divider"
-    :class="{ 'habit-row--dimmed': isDimmed }"
+    :class="{
+      'habit-row--dimmed': isDimmed,
+      'habit-row--done': item.completed && mode !== 'future',
+    }"
   >
     <template #leading>
       <div
@@ -189,6 +192,9 @@ function handleToggle(e: Event) {
 
 .habit-row__title--done {
   color: var(--text-secondary);
+  text-decoration: line-through;
+  text-decoration-thickness: 1.5px;
+  text-decoration-color: color-mix(in srgb, var(--text-secondary) 75%, transparent);
 }
 
 .habit-row__title:focus-visible {
@@ -208,7 +214,11 @@ function handleToggle(e: Event) {
   flex-shrink: 0;
 }
 
+.habit-row--done {
+  opacity: 0.7;
+}
+
 .habit-row--dimmed {
-  opacity: 0.62;
+  opacity: 0.55;
 }
 </style>
