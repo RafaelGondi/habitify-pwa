@@ -74,11 +74,18 @@ export function useDayHabits(dateStr: Ref<string> | ComputedRef<string>) {
       })
   })
 
+  /** Cota do período já batida, mas sem check hoje (ex.: 3x/semana já feitos). */
+  function isQuotaMetPending(h: HabitWithStatus): boolean {
+    if (h.completed || h.skipped || !h.periodProgress) return false
+    return h.periodProgress.done >= h.periodProgress.total
+  }
+
   const sortedHabits = computed(() => {
-    const pending = dueHabits.value.filter(h => !h.completed && !h.skipped)
+    const pending = dueHabits.value.filter(h => !h.completed && !h.skipped && !isQuotaMetPending(h))
+    const quotaMet = dueHabits.value.filter(h => isQuotaMetPending(h))
     const done = dueHabits.value.filter(h => h.completed && !h.skipped)
     const skipped = dueHabits.value.filter(h => h.skipped)
-    return [...pending, ...done, ...skipped]
+    return [...pending, ...quotaMet, ...done, ...skipped]
   })
 
   // Skipped habits are excluded from completion rate
