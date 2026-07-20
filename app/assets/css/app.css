@@ -9,7 +9,6 @@
   margin: 0 auto;
   overflow: hidden;
   background: var(--bg);
-  --fab-height: 3.25rem;
 }
 
 .app-main {
@@ -39,67 +38,18 @@
     calc(var(--nav-height) + var(--safe-bottom) + var(--space-6));
 }
 
-.page-body--with-fab {
-  padding-bottom: calc(
-    var(--nav-height)
-    + var(--safe-bottom)
-    + var(--space-3)
-    + var(--fab-height)
-    + var(--space-5)
-  );
-}
-
 .page-body--flush-top {
   padding-top: var(--space-4);
 }
 
-/* Editorial day header */
-.day-header {
-  padding:
-    calc(var(--page-pad-top) + var(--safe-top))
-    var(--page-pad-x)
-    var(--space-4);
-  display: flex;
-  flex-direction: column;
-  gap: var(--space-4);
-  border-bottom: 1px solid var(--border);
-  background: var(--bg);
-}
-
-.day-header__top {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: var(--space-4);
-}
-
-.day-header__heading {
-  flex: 1;
-  min-width: 0;
-}
-
-.day-header__heading .page-title {
-  max-width: none;
-  font-size: clamp(32px, 8vw, 40px);
-}
-
-.day-header__actions {
-  display: flex;
-  gap: var(--space-1);
-  margin-top: var(--space-1);
-  padding: 2px;
-  border-radius: var(--radius-md);
-  background: var(--bg-soft);
-}
-
-.day-header__date {
+.day-meta {
   margin-top: var(--space-1);
   font-size: 14px;
   color: var(--text-secondary);
   line-height: 1.4;
 }
 
-.day-header__progress {
+.day-progress {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
@@ -137,19 +87,6 @@
   background: var(--accent-soft);
   border-color: color-mix(in srgb, var(--accent) 18%, transparent);
   color: var(--accent);
-}
-
-.page-header-simple {
-  padding:
-    calc(var(--page-pad-top) + var(--safe-top))
-    var(--page-pad-x)
-    var(--space-4);
-  border-bottom: 1px solid var(--border);
-}
-
-.page-header-simple .page-title {
-  max-width: none;
-  font-size: clamp(28px, 6vw, 34px);
 }
 
 /* Habit emoji tile — maps habit colors to soft fills */
@@ -258,13 +195,6 @@ button.check-toggle::after {
 .check-toggle--future {
   border-style: dashed;
   opacity: 0.55;
-}
-
-.fab {
-  position: fixed;
-  z-index: 20;
-  bottom: calc(var(--safe-bottom) + var(--nav-height) + var(--space-3));
-  right: var(--page-pad-x);
 }
 
 .login-page {

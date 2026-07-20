@@ -140,15 +140,12 @@ function onCalendarEnsureDate(dateStr: string) {
 
 <template>
   <div class="app-page app-scroll">
-    <header class="progress-header">
-      <span class="page-label">Sua evolução</span>
-      <h1 class="page-title">
-        Progresso
-      </h1>
-      <p class="progress-header__intro">
-        Tendências ajudam mais que dias isolados.
-      </p>
-    </header>
+    <AkPageHeader
+      variant="flush"
+      label="Sua evolução"
+      title="Progresso"
+      meta="Tendências ajudam mais que dias isolados."
+    />
 
     <div
       v-if="days.length"
@@ -300,19 +297,6 @@ function onCalendarEnsureDate(dateStr: string) {
 </template>
 
 <style scoped>
-.progress-header {
-  padding:
-    calc(var(--page-pad-top) + var(--safe-top))
-    var(--page-pad-x)
-    var(--space-6);
-}
-
-.progress-header__intro {
-  margin-top: var(--space-2);
-  color: var(--text-secondary);
-  font-size: 14px;
-}
-
 .progress-body {
   display: flex;
   flex-direction: column;

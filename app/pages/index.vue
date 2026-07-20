@@ -132,43 +132,41 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 
 <template>
   <div class="app-page">
-    <header class="day-header">
-      <div class="day-header__top">
-        <div class="day-header__heading">
-          <span class="page-label">Sua rotina</span>
-          <h1 class="page-title">
-            {{ dateLabel }}
-          </h1>
-          <p class="day-header__date capitalize">
-            {{ dateSub }}
-          </p>
-        </div>
+    <AkPageHeader
+      label="Sua rotina"
+      :title="dateLabel"
+      size="md"
+    >
+      <template #meta>
+        <p class="day-meta capitalize">
+          {{ dateSub }}
+        </p>
+      </template>
 
-        <div class="day-header__actions">
-          <AkIconButton
-            variant="ghost"
-            size="md"
-            label="Dia anterior"
-            @click="navigate('prev')"
-          >
-            <AppIcon
-              name="lucide:chevron-left"
-              :size="20"
-            />
-          </AkIconButton>
-          <AkIconButton
-            variant="ghost"
-            size="md"
-            label="Próximo dia"
-            @click="navigate('next')"
-          >
-            <AppIcon
-              name="lucide:chevron-right"
-              :size="20"
-            />
-          </AkIconButton>
-        </div>
-      </div>
+      <template #actions>
+        <AkIconButton
+          variant="ghost"
+          size="md"
+          label="Dia anterior"
+          @click="navigate('prev')"
+        >
+          <AppIcon
+            name="lucide:chevron-left"
+            :size="20"
+          />
+        </AkIconButton>
+        <AkIconButton
+          variant="ghost"
+          size="md"
+          label="Próximo dia"
+          @click="navigate('next')"
+        >
+          <AppIcon
+            name="lucide:chevron-right"
+            :size="20"
+          />
+        </AkIconButton>
+      </template>
 
       <Transition name="fade">
         <div
@@ -187,7 +185,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 
       <div
         v-if="!isFuture && filteredActiveHabits.length"
-        class="day-header__progress"
+        class="day-progress"
       >
         <AkProgress
           :value="filteredCompletedCount"
@@ -210,7 +208,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           {{ filter.label }}
         </AkChip>
       </div>
-    </header>
+    </AkPageHeader>
 
     <div
       class="flex-1 day-content"
@@ -221,7 +219,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         <div
           :key="currentDateStr"
           class="app-scroll page-body page-body--flush-top"
-          :class="{ 'page-body--with-fab': isToday }"
+          :class="{ 'ak-page-body--with-fab': isToday }"
         >
           <Transition name="fade">
             <div
@@ -319,10 +317,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       :habit="selectedHabit"
     />
 
-    <div
-      v-if="isToday"
-      class="fab"
-    >
+    <AkFab v-if="isToday">
       <AkButton
         size="lg"
         aria-label="Novo hábito"
@@ -336,7 +331,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         </template>
         Novo
       </AkButton>
-    </div>
+    </AkFab>
 
     <AkSheet
       v-model:open="isModalOpen"

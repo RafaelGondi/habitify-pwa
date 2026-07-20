@@ -83,12 +83,10 @@ function habitSubtitle(habit: Habit) {
 
 <template>
   <div class="app-page app-scroll">
-    <header class="page-header-simple">
-      <span class="page-label">Gerenciar</span>
-      <h1 class="page-title">
-        Hábitos
-      </h1>
-    </header>
+    <AkPageHeader
+      label="Gerenciar"
+      title="Hábitos"
+    />
 
     <div class="page-body page-body--flush-top stack--lg">
       <section>

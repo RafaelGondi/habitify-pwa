@@ -15,7 +15,7 @@
   "dependencies": {
     "@iconify-json/lucide": "^1.2.100",
     "@iconify/vue": "^5.0.1",
-    "@rafael_dias/akoma": "^0.8.6",
+    "@rafael_dias/akoma": "^0.8.7",
     "@sysvale/cuida-icons": "^1.18.0",
     "@vite-pwa/nuxt": "^1.1.1",
     "firebase": "^12.13.0",
