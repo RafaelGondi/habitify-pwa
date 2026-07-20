@@ -7,10 +7,10 @@ watchEffect(() => {
 </script>
 
 <template>
-  <div class="app-root">
+  <div class="ak-app-root">
     <AkAmbientBg contained />
     <template v-if="authReady && user">
-      <main class="app-main">
+      <main class="ak-app-main">
         <slot />
       </main>
       <AppBottomNav />
@@ -19,8 +19,8 @@ watchEffect(() => {
       v-else
       class="loader-center"
     >
-      <AppIcon
-        name="lucide:loader-circle"
+      <AkIcon
+        name="loading-right-outline"
         :size="28"
         class="spin text-accent"
       />

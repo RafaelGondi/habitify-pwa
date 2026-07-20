@@ -15,8 +15,8 @@ importers:
         specifier: ^5.0.1
         version: 5.0.1(vue@3.5.31(typescript@6.0.2))
       '@rafael_dias/akoma':
-        specifier: ^0.8.7
-        version: 0.8.7(@sysvale/cuida-icons@1.18.0)(vue@3.5.31(typescript@6.0.2))
+        specifier: ^0.8.8
+        version: 0.8.8(@sysvale/cuida-icons@1.18.0)(vue@3.5.31(typescript@6.0.2))
       '@sysvale/cuida-icons':
         specifier: ^1.18.0
         version: 1.18.0
@@ -1783,8 +1783,8 @@ packages:
   '@protobufjs/utf8@1.1.1':
     resolution: {integrity: sha512-oOAWABowe8EAbMyWKM0tYDKi8Yaox52D+HWZhAIJqQXbqe0xI/GV7FhLWqlEKreMkfDjshR5FKgi3mnle0h6Eg==}
 
-  '@rafael_dias/akoma@0.8.7':
-    resolution: {integrity: sha512-KFvNKuy6FInyWVWAJ1Y2KBI2F+kC4Xi7/Wic0pebtDneZxgoPHxDo6Qv8YcfD+pPODs5x2g8vYq61fYOlGFQXg==}
+  '@rafael_dias/akoma@0.8.8':
+    resolution: {integrity: sha512-61uXUstNaEjfaVio8KfoLxAVza2Fmoz/RPs5OwE+vAIipJvyRwM+pztjmW/Xbhicj4MLoXqLr8V82wHcYgfA+A==}
     peerDependencies:
       '@sysvale/cuida-icons': ^1.18.0
       vue: ^3.5.0
@@ -7627,7 +7627,7 @@ snapshots:
 
   '@protobufjs/utf8@1.1.1': {}
 
-  '@rafael_dias/akoma@0.8.7(@sysvale/cuida-icons@1.18.0)(vue@3.5.31(typescript@6.0.2))':
+  '@rafael_dias/akoma@0.8.8(@sysvale/cuida-icons@1.18.0)(vue@3.5.31(typescript@6.0.2))':
     dependencies:
       '@sysvale/cuida-icons': 1.18.0
       vue: 3.5.31(typescript@6.0.2)

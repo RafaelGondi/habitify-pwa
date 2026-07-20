@@ -148,24 +148,16 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           variant="ghost"
           size="md"
           label="Dia anterior"
+          icon="caret-left-outline"
           @click="navigate('prev')"
-        >
-          <AppIcon
-            name="lucide:chevron-left"
-            :size="20"
-          />
-        </AkIconButton>
+        />
         <AkIconButton
           variant="ghost"
           size="md"
           label="Próximo dia"
+          icon="caret-right-outline"
           @click="navigate('next')"
-        >
-          <AppIcon
-            name="lucide:chevron-right"
-            :size="20"
-          />
-        </AkIconButton>
+        />
       </template>
 
       <Transition name="fade">
@@ -174,8 +166,8 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
           class="chip-row"
         >
           <AkChip @click="goToToday">
-            <AppIcon
-              name="lucide:calendar-check"
+            <AkIcon
+              name="calendar-outline"
               :size="14"
             />
             Ir para hoje
@@ -285,8 +277,8 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
                 <template #action>
                   <AkButton @click="isModalOpen = true">
                     <template #icon>
-                      <AppIcon
-                        name="lucide:plus"
+                      <AkIcon
+                        name="plus-outline"
                         :size="18"
                       />
                     </template>
@@ -324,8 +316,8 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
         @click="isModalOpen = true"
       >
         <template #icon>
-          <AppIcon
-            name="lucide:plus"
+          <AkIcon
+            name="plus-outline"
             :size="22"
           />
         </template>

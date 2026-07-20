@@ -1,25 +1,7 @@
-/* Habitify — layout shell only. Visual language lives in @rafael_dias/akoma tokens. */
-
-.app-root {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100dvh;
-  max-width: var(--shell-max);
-  margin: 0 auto;
-  overflow: hidden;
-  background: var(--bg);
-}
-
-.app-main {
-  position: relative;
-  z-index: 1;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
+/* Habitify — domain surfaces on top of Akoma shell/tokens. */
 
 .app-page {
+  /* alias kept for existing pages; prefer ak-app-page going forward */
   display: flex;
   flex-direction: column;
   height: 100%;

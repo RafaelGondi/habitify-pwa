@@ -21,7 +21,7 @@ function variant(color: string) {
           <AkBadge :variant="variant(item.color)" :label="item.title" />
           <p v-if="item.description" class="toast-item__desc">{{ item.description }}</p>
           <button class="toast-item__close tap-scale" type="button" aria-label="Fechar" @click="dismiss(item.id)">
-            <AppIcon name="lucide:x" :size="14" />
+            <AkIcon name="x-outline" :size="14" />
           </button>
         </div>
       </TransitionGroup>

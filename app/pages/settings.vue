@@ -101,8 +101,8 @@ function habitSubtitle(habit: Habit) {
               @click="openAdd"
             >
               <template #icon>
-                <AppIcon
-                  name="lucide:plus"
+                <AkIcon
+                  name="plus-outline"
                   :size="16"
                 />
               </template>
@@ -136,13 +136,9 @@ function habitSubtitle(habit: Habit) {
                   variant="ghost"
                   size="sm"
                   label="Editar"
+                  icon="edit-outline"
                   @click="openEdit(habit)"
-                >
-                  <AppIcon
-                    name="lucide:pencil"
-                    :size="16"
-                  />
-                </AkIconButton>
+                />
                 <AkIconButton
                   variant="ghost"
                   size="sm"
@@ -158,13 +154,9 @@ function habitSubtitle(habit: Habit) {
                   variant="ghost"
                   size="sm"
                   label="Excluir"
+                  icon="trash-outline"
                   @click="confirmDeleteId = habit.id"
-                >
-                  <AppIcon
-                    name="lucide:trash-2"
-                    :size="16"
-                  />
-                </AkIconButton>
+                />
               </div>
             </template>
           </AkListRow>
@@ -187,8 +179,8 @@ function habitSubtitle(habit: Habit) {
                 @click="openAdd"
               >
                 <template #icon>
-                  <AppIcon
-                    name="lucide:plus"
+                  <AkIcon
+                    name="plus-outline"
                     :size="16"
                   />
                 </template>
@@ -206,13 +198,9 @@ function habitSubtitle(habit: Habit) {
               variant="ghost"
               size="sm"
               :label="showArchived ? 'Recolher' : 'Expandir'"
+              :icon="showArchived ? 'caret-up-outline' : 'caret-down-outline'"
               @click="showArchived = !showArchived"
-            >
-              <AppIcon
-                :name="showArchived ? 'lucide:chevron-up' : 'lucide:chevron-down'"
-                :size="16"
-              />
-            </AkIconButton>
+            />
           </template>
         </AkSectionHeader>
 
@@ -256,13 +244,9 @@ function habitSubtitle(habit: Habit) {
                     variant="ghost"
                     size="sm"
                     label="Excluir"
+                    icon="trash-outline"
                     @click="confirmDeleteId = habit.id"
-                  >
-                    <AppIcon
-                      name="lucide:trash-2"
-                      :size="16"
-                    />
-                  </AkIconButton>
+                  />
                 </div>
               </template>
             </AkListRow>
@@ -293,8 +277,8 @@ function habitSubtitle(habit: Habit) {
             padding="md"
             @click="$pwa?.install()"
           >
-            <AppIcon
-              name="lucide:download"
+            <AkIcon
+              name="download-outline"
               :size="20"
               class="text-accent"
             />
@@ -303,8 +287,8 @@ function habitSubtitle(habit: Habit) {
               <span class="text-xs text-muted">Adicionar à tela inicial</span>
             </template>
             <template #trailing>
-              <AppIcon
-                name="lucide:chevron-right"
+              <AkIcon
+                name="caret-right-outline"
                 :size="16"
                 class="text-muted"
               />
@@ -325,9 +309,9 @@ function habitSubtitle(habit: Habit) {
                 referrerpolicy="no-referrer"
                 alt=""
               >
-              <AppIcon
+              <AkIcon
                 v-else
-                name="lucide:user-circle"
+                name="user-outline"
                 :size="28"
                 class="text-accent"
               />
@@ -341,13 +325,9 @@ function habitSubtitle(habit: Habit) {
                 variant="ghost"
                 size="sm"
                 label="Sair"
+                icon="logout-outline"
                 @click="logout"
-              >
-                <AppIcon
-                  name="lucide:log-out"
-                  :size="16"
-                />
-              </AkIconButton>
+              />
             </template>
           </AkListRow>
         </AkList>
@@ -361,8 +341,8 @@ function habitSubtitle(habit: Habit) {
             padding="md"
             @click="exportJSON"
           >
-            <AppIcon
-              name="lucide:upload"
+            <AkIcon
+              name="upload-outline"
               :size="20"
               class="text-accent"
             />
@@ -371,8 +351,8 @@ function habitSubtitle(habit: Habit) {
               <span class="text-xs text-muted">Baixar hábitos e progresso em JSON</span>
             </template>
             <template #trailing>
-              <AppIcon
-                name="lucide:chevron-right"
+              <AkIcon
+                name="caret-right-outline"
                 :size="16"
                 class="text-muted"
               />
@@ -384,8 +364,8 @@ function habitSubtitle(habit: Habit) {
             interactive
             @click="importInput?.click()"
           >
-            <AppIcon
-              name="lucide:download"
+            <AkIcon
+              name="download-outline"
               :size="20"
               class="text-accent"
             />
@@ -394,8 +374,8 @@ function habitSubtitle(habit: Habit) {
               <span class="text-xs text-muted">Mesclar de um arquivo JSON</span>
             </template>
             <template #trailing>
-              <AppIcon
-                name="lucide:chevron-right"
+              <AkIcon
+                name="caret-right-outline"
                 :size="16"
                 class="text-muted"
               />
@@ -436,8 +416,8 @@ function habitSubtitle(habit: Habit) {
             @click="handleDelete"
           >
             <template #icon>
-              <AppIcon
-                name="lucide:trash-2"
+              <AkIcon
+                name="trash-outline"
                 :size="16"
               />
             </template>

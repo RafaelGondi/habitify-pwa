@@ -115,8 +115,8 @@ function handleToggle(e: Event) {
           label="Nota"
           @click="emit('openNote')"
         >
-          <AppIcon
-            name="lucide:sticky-note"
+          <AkIcon
+            name="document-text-outline"
             :size="16"
             :class="item.note ? 'text-accent' : 'text-muted'"
           />
@@ -129,8 +129,14 @@ function handleToggle(e: Event) {
           :label="item.skipped ? 'Desfazer pulo' : 'Pular hoje'"
           @click="emit('skip')"
         >
+          <AkIcon
+            v-if="item.skipped"
+            name="undo-outline"
+            :size="15"
+          />
           <AppIcon
-            :name="item.skipped ? 'lucide:undo-2' : 'lucide:forward'"
+            v-else
+            name="lucide:forward"
             :size="15"
           />
         </AkIconButton>

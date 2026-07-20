@@ -76,8 +76,8 @@ const statusLabel = computed(() => {
         >
           <span>{{ pct }}</span>
         </span>
-        <AppIcon
-          :name="isExpanded ? 'lucide:chevron-up' : 'lucide:chevron-down'"
+        <AkIcon
+          :name="isExpanded ? 'caret-up-outline' : 'caret-down-outline'"
           :size="15"
           class="text-muted"
         />
@@ -123,8 +123,8 @@ const statusLabel = computed(() => {
             :class="{ 'history-habit__state--done': isHabitGoalMet(item) }"
             :aria-label="isHabitGoalMet(item) ? 'Concluído' : 'Não concluído'"
           >
-            <AppIcon
-              :name="isHabitGoalMet(item) ? 'lucide:check' : 'lucide:minus'"
+            <AkIcon
+              :name="isHabitGoalMet(item) ? 'check-outline' : 'minus-outline'"
               :size="14"
             />
           </span>

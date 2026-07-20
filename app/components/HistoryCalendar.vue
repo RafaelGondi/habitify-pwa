@@ -165,14 +165,10 @@ watch(
         label="Mês anterior"
         variant="ghost"
         size="sm"
+        icon="caret-left-outline"
         :disabled="monthIndex <= 0"
         @click="goToMonth(monthIndex - 1, 'right')"
-      >
-        <AppIcon
-          name="lucide:chevron-left"
-          :size="18"
-        />
-      </AkIconButton>
+      />
 
       <div class="history-cal__title-wrap">
         <h2 class="history-cal__title">
@@ -187,14 +183,10 @@ watch(
         label="Próximo mês"
         variant="ghost"
         size="sm"
+        icon="caret-right-outline"
         :disabled="monthIndex >= months.length - 1"
         @click="goToMonth(monthIndex + 1, 'left')"
-      >
-        <AppIcon
-          name="lucide:chevron-right"
-          :size="18"
-        />
-      </AkIconButton>
+      />
     </div>
 
     <div
