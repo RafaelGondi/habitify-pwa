@@ -338,15 +338,16 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       </AkButton>
     </div>
 
-    <AppBottomSheet
+    <AkSheet
       v-model:open="isModalOpen"
       title="Novo hábito"
+      close-label="Fechar"
     >
       <HabitForm
         @submit="handleHabitSubmit"
         @cancel="isModalOpen = false"
       />
-    </AppBottomSheet>
+    </AkSheet>
 
     <NoteModal
       v-model:open="noteModalOpen"

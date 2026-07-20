@@ -103,7 +103,12 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
 </script>
 
 <template>
-  <AppBottomSheet :open="open" :title="habit ? `${habit.emoji} ${habit.name}` : ''" @update:open="$emit('update:open', $event)">
+  <AkSheet
+    :open="open"
+    :title="habit ? `${habit.emoji} ${habit.name}` : ''"
+    close-label="Fechar"
+    @update:open="$emit('update:open', $event)"
+  >
     <div v-if="habit" class="detail-body">
       <div class="stats-grid">
         <div class="stat-cell">
@@ -166,7 +171,7 @@ const DAY_LABELS = ['S', 'T', 'Q', 'Q', 'S', 'S', 'D']
         </div>
       </div>
     </div>
-  </AppBottomSheet>
+  </AkSheet>
 </template>
 
 <style scoped>

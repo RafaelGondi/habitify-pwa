@@ -29,9 +29,10 @@ function handleSave() {
 </script>
 
 <template>
-  <AppBottomSheet
+  <AkSheet
     :open="open"
     :title="`${habitEmoji} ${habitName}`"
+    close-label="Fechar"
     @update:open="$emit('update:open', $event)"
   >
     <div class="form-stack">
@@ -58,5 +59,5 @@ function handleSave() {
         </AkButton>
       </div>
     </div>
-  </AppBottomSheet>
+  </AkSheet>
 </template>

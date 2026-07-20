@@ -414,9 +414,10 @@ function habitSubtitle(habit: Habit) {
       </section>
     </div>
 
-    <AppBottomSheet
+    <AkSheet
       :open="!!confirmDeleteId"
       title="Excluir hábito"
+      close-label="Fechar"
       @update:open="closeConfirmDelete"
     >
       <div class="form-stack">
@@ -446,11 +447,12 @@ function habitSubtitle(habit: Habit) {
           </AkButton>
         </div>
       </div>
-    </AppBottomSheet>
+    </AkSheet>
 
-    <AppBottomSheet
+    <AkSheet
       v-model:open="isModalOpen"
       :title="modalTitle"
+      close-label="Fechar"
     >
       <HabitForm
         :key="modalKey"
@@ -458,7 +460,7 @@ function habitSubtitle(habit: Habit) {
         @submit="handleSubmit"
         @cancel="isModalOpen = false"
       />
-    </AppBottomSheet>
+    </AkSheet>
   </div>
 </template>
 
