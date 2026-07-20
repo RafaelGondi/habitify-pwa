@@ -1,39 +1,5 @@
 /* Habitify — layout shell only. Visual language lives in @rafael_dias/akoma tokens. */
 
-/*
- * Completion indicators use Akoma 0.8.3's five chromatic shades:
- * --accent-lighter → --accent-light → --accent → --accent-dark → --accent-darker
- */
-.completion-shade--none {
-  background: var(--bg-muted);
-  color: var(--text-tertiary);
-}
-
-.completion-shade--lighter {
-  background: var(--accent-lighter);
-  color: var(--text);
-}
-
-.completion-shade--light {
-  background: var(--accent-light);
-  color: var(--text);
-}
-
-.completion-shade--base {
-  background: var(--accent);
-  color: var(--accent-contrast);
-}
-
-.completion-shade--dark {
-  background: var(--accent-dark);
-  color: var(--accent-contrast);
-}
-
-.completion-shade--darker {
-  background: var(--accent-darker);
-  color: var(--accent-contrast);
-}
-
 .app-root {
   position: relative;
   display: flex;

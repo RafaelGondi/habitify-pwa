@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DayRecord } from '~/types'
-import { completionShade } from '~/utils/completionShade'
+import { completionShade, completionShadeColor } from '@rafael_dias/akoma'
 
 const props = defineProps<{
   day: DayRecord
@@ -13,16 +13,9 @@ const activeHabits = computed(() => props.day.habits.filter(h => !h.skipped))
 const completedCount = computed(() => activeHabits.value.filter(h => isHabitGoalMet(h)).length)
 const pct = computed(() => Math.round(props.day.completionRate * 100))
 
-const ringShadeVar = computed(() => {
-  switch (completionShade(props.day.completionRate)) {
-    case 'lighter': return 'var(--accent-lighter)'
-    case 'light': return 'var(--accent-light)'
-    case 'base': return 'var(--accent)'
-    case 'dark': return 'var(--accent-dark)'
-    case 'darker': return 'var(--accent-darker)'
-    default: return 'var(--bg-muted)'
-  }
-})
+const ringShadeVar = computed(() =>
+  completionShadeColor(completionShade(props.day.completionRate)),
+)
 
 const dateParts = computed(() => {
   const date = new Date(`${props.day.date}T12:00:00`)

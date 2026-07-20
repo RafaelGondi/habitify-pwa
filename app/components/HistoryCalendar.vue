@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { DayRecord } from '~/types'
-import { completionShade, completionShadeClass } from '~/utils/completionShade'
+import { completionShade, completionShadeClass } from '@rafael_dias/akoma'
 
 const props = defineProps<{
   days: DayRecord[]
@@ -257,12 +257,12 @@ watch(
       class="history-cal__legend"
       aria-label="Escala de completude"
     >
-      <span><i class="swatch completion-shade--none" />0</span>
-      <span><i class="swatch completion-shade--lighter" /></span>
-      <span><i class="swatch completion-shade--light" /></span>
-      <span><i class="swatch completion-shade--base" /></span>
-      <span><i class="swatch completion-shade--dark" /></span>
-      <span><i class="swatch completion-shade--darker" />100</span>
+      <span><i class="swatch ak-completion-shade--none" />0</span>
+      <span><i class="swatch ak-completion-shade--lighter" /></span>
+      <span><i class="swatch ak-completion-shade--light" /></span>
+      <span><i class="swatch ak-completion-shade--base" /></span>
+      <span><i class="swatch ak-completion-shade--dark" /></span>
+      <span><i class="swatch ak-completion-shade--darker" />100</span>
     </div>
 
     <div
@@ -393,33 +393,33 @@ watch(
   color: var(--text-tertiary);
 }
 
-/* Scoped cell bg beats global .completion-shade--*; redeclare with higher specificity. */
-.history-cal__cell.completion-shade--none {
+/* Scoped cell bg beats package .ak-completion-shade--*; redeclare with higher specificity. */
+.history-cal__cell.ak-completion-shade--none {
   background: var(--bg-muted);
   color: var(--text-tertiary);
 }
 
-.history-cal__cell.completion-shade--lighter {
+.history-cal__cell.ak-completion-shade--lighter {
   background: var(--accent-lighter);
   color: var(--text);
 }
 
-.history-cal__cell.completion-shade--light {
+.history-cal__cell.ak-completion-shade--light {
   background: var(--accent-light);
   color: var(--text);
 }
 
-.history-cal__cell.completion-shade--base {
+.history-cal__cell.ak-completion-shade--base {
   background: var(--accent);
   color: var(--accent-contrast);
 }
 
-.history-cal__cell.completion-shade--dark {
+.history-cal__cell.ak-completion-shade--dark {
   background: var(--accent-dark);
   color: var(--accent-contrast);
 }
 
-.history-cal__cell.completion-shade--darker {
+.history-cal__cell.ak-completion-shade--darker {
   background: var(--accent-darker);
   color: var(--accent-contrast);
 }
