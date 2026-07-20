@@ -82,7 +82,7 @@ function habitSubtitle(habit: Habit) {
 </script>
 
 <template>
-  <div class="app-page app-scroll">
+  <div class="ak-app-page ak-app-scroll">
     <AkPageHeader
       label="Gerenciar"
       title="Hábitos"

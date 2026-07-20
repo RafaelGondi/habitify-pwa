@@ -29,7 +29,7 @@ const dateParts = computed(() => {
   return {
     day: date.getDate(),
     weekday,
-    month
+    month,
   }
 })
 
@@ -85,51 +85,20 @@ const statusLabel = computed(() => {
     </button>
 
     <Transition name="accordion">
-      <ul
+      <div
         v-if="isExpanded"
         class="history-day__habits"
       >
-        <li
-          v-for="item in day.habits"
-          :key="item.habit.id"
-          class="history-habit"
-        >
-          <span class="history-habit__emoji">{{ item.habit.emoji }}</span>
-
-          <span class="history-habit__content">
-            <span
-              class="history-habit__name"
-              :class="{ 'history-habit__name--muted': item.skipped }"
-            >
-              {{ item.habit.name }}
-            </span>
-            <span
-              v-if="item.periodProgress"
-              class="history-habit__meta"
-            >
-              {{ item.periodProgress.done }}/{{ item.periodProgress.total }}
-              {{ quotaUnitLongLabel(item.periodProgress.unit) }}
-            </span>
-          </span>
-
-          <AkBadge
-            v-if="item.skipped"
-            variant="neutral"
-            label="Pulado"
+        <AkList>
+          <HabitCard
+            v-for="(item, index) in day.habits"
+            :key="item.habit.id"
+            :item="item"
+            mode="past"
+            :divider="index < day.habits.length - 1"
           />
-          <span
-            v-else
-            class="history-habit__state"
-            :class="{ 'history-habit__state--done': isHabitGoalMet(item) }"
-            :aria-label="isHabitGoalMet(item) ? 'Concluído' : 'Não concluído'"
-          >
-            <AkIcon
-              :name="isHabitGoalMet(item) ? 'check-outline' : 'minus-outline'"
-              :size="14"
-            />
-          </span>
-        </li>
-      </ul>
+        </AkList>
+      </div>
     </Transition>
   </li>
 </template>
@@ -250,67 +219,7 @@ const statusLabel = computed(() => {
 }
 
 .history-day__habits {
-  margin: 0;
-  padding: var(--space-2) var(--space-4) var(--space-3) 4.25rem;
   background: var(--bg-soft);
-  list-style: none;
-}
-
-.history-habit {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  min-height: 2.5rem;
-}
-
-.history-habit + .history-habit {
-  border-top: 1px solid color-mix(in srgb, var(--border) 70%, transparent);
-}
-
-.history-habit__emoji {
-  width: 1.5rem;
-  text-align: center;
-  font-size: 1rem;
-  flex-shrink: 0;
-}
-
-.history-habit__content {
-  display: flex;
-  min-width: 0;
-  flex: 1;
-  flex-direction: column;
-}
-
-.history-habit__name {
-  overflow: hidden;
-  font-size: 13px;
-  font-weight: 600;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.history-habit__name--muted {
-  color: var(--text-tertiary);
-}
-
-.history-habit__meta {
-  color: var(--text-tertiary);
-  font-size: 10px;
-}
-
-.history-habit__state {
-  width: 1.5rem;
-  height: 1.5rem;
-  border-radius: var(--radius-full);
-  display: grid;
-  place-items: center;
-  background: var(--bg-muted);
-  color: var(--text-tertiary);
-  flex-shrink: 0;
-}
-
-.history-habit__state--done {
-  background: var(--accent-soft);
-  color: var(--accent);
+  padding-bottom: var(--space-2);
 }
 </style>

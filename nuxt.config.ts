@@ -46,6 +46,7 @@ export default defineNuxtConfig({
       name: 'Habitify',
       short_name: 'Habitify',
       description: 'Acompanhe seus hábitos diários',
+      // Install/splash chrome; runtime status bar follows meta theme-color via useAppTheme.
       theme_color: '#f8f6f1',
       background_color: '#f8f6f1',
       display: 'standalone',

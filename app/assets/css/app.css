@@ -1,18 +1,5 @@
 /* Habitify — domain surfaces on top of Akoma shell/tokens. */
 
-.app-page {
-  /* alias kept for existing pages; prefer ak-app-page going forward */
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.app-scroll {
-  overflow-y: auto;
-  height: 100%;
-  -webkit-overflow-scrolling: touch;
-}
-
 .page-body {
   padding:
     var(--space-5)

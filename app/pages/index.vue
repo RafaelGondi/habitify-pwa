@@ -131,7 +131,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
 </script>
 
 <template>
-  <div class="app-page">
+  <div class="ak-app-page">
     <AkPageHeader
       label="Sua rotina"
       :title="dateLabel"
@@ -210,7 +210,7 @@ const isNotToday = computed(() => currentDateStr.value !== todayStr)
       <Transition :name="'slide-' + slideDir">
         <div
           :key="currentDateStr"
-          class="app-scroll page-body page-body--flush-top"
+          class="ak-app-scroll page-body page-body--flush-top"
           :class="{ 'ak-page-body--with-fab': isToday }"
         >
           <Transition name="fade">

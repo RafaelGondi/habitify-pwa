@@ -139,7 +139,7 @@ function onCalendarEnsureDate(dateStr: string) {
 </script>
 
 <template>
-  <div class="app-page app-scroll">
+  <div class="ak-app-page ak-app-scroll">
     <AkPageHeader
       variant="flush"
       label="Sua evolução"
